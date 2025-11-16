@@ -1,0 +1,209 @@
+# Apache APISIX Configuration for Kado24 Platform
+
+apisix:
+  node_listen:
+    - 9080              # HTTP port
+  enable_admin: true
+  enable_dev_mode: false
+  enable_reuseport: true
+  enable_ipv6: false
+  
+  config_center: etcd
+  
+  proxy_cache:
+    cache_ttl: 10s
+    zones:
+      - name: "disk_cache_one"
+        memory_size: 50m
+        disk_size: 1G
+        disk_path: "/tmp/disk_cache_one"
+        cache_levels: "1:2"
+  
+  admin_key:
+    - name: "admin"
+      key: edd1c9f034335f136f87ad84b625c8f1
+      role: admin
+    - name: "viewer"
+      key: 4054f7cf07e344346cd3f287985e76a2
+      role: viewer
+
+  router:
+    http: 'radixtree_uri'  # radixtree_uri|radixtree_host_uri
+    ssl: 'radixtree_sni'
+
+deployment:
+  role: traditional
+  role_traditional:
+    config_provider: etcd
+  
+  admin:
+    admin_listen:
+      ip: 0.0.0.0
+      port: 9091
+    
+    https_admin: false
+    
+    admin_api_mtls:
+      admin_ssl_cert: ""
+      admin_ssl_cert_key: ""
+      admin_ssl_ca_cert: ""
+    
+    allow_admin:
+      - 0.0.0.0/0
+  
+  etcd:
+    host:
+      - "http://etcd:2379"
+    prefix: "/apisix"
+    timeout: 30
+    startup_retry: 5
+    health_check_timeout: 10
+
+nginx_config:
+  error_log: "/usr/local/apisix/logs/error.log"
+  error_log_level: "info"
+  
+  worker_processes: auto
+  
+  enable_cpu_affinity: true
+  
+  worker_rlimit_nofile: 20480
+  
+  worker_shutdown_timeout: 240s
+  
+  event:
+    worker_connections: 10620
+  
+  meta:
+    lua_shared_dict:
+      prometheus-metrics: 15m
+  
+  http:
+    enable_access_log: true
+    access_log: "/usr/local/apisix/logs/access.log"
+    access_log_format: '$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" $request_time'
+    
+    keepalive_timeout: 60s
+    client_header_timeout: 60s
+    client_body_timeout: 60s
+    client_max_body_size: 0
+    
+    underscores_in_headers: "on"
+    real_ip_header: "X-Real-IP"
+    real_ip_recursive: "off"
+    real_ip_from:
+      - 127.0.0.1
+      - "unix:"
+  
+  stream:
+    enable_access_log: false
+
+# Plugin configurations
+plugins:
+  # Authentication
+  - jwt-auth
+  - key-auth
+  - basic-auth
+  - oauth
+  
+  # Security
+  - cors
+  - csrf
+  - ip-restriction
+  - ua-restriction
+  - referer-restriction
+  
+  # Traffic Control
+  - limit-req
+  - limit-count
+  - limit-conn
+  
+  # Transformation
+  - proxy-rewrite
+  - response-rewrite
+  - grpc-transcode
+  - grpc-web
+  
+  # Observability
+  - prometheus
+  - zipkin
+  - skywalking
+  - opentelemetry
+  - error-log-logger
+  - http-logger
+  - tcp-logger
+  - kafka-logger
+  
+  # Traffic Management
+  - proxy-cache
+  - proxy-mirror
+  - request-id
+  - echo
+  - serverless-pre-function
+  - serverless-post-function
+  - ext-plugin-pre-req
+  - ext-plugin-post-req
+  
+  # Other
+  - redirect
+  - wolf-rbac
+
+plugin_attr:
+  # Prometheus metrics
+  prometheus:
+    export_addr:
+      ip: "0.0.0.0"
+      port: 9094
+    export_uri: /apisix/prometheus/metrics
+    metric_prefix: apisix_
+    enable_export_server: true
+  
+  # Zipkin tracing
+  zipkin:
+    endpoint: "http://zipkin:9411/api/v2/spans"
+    sample_ratio: 1
+    service_name: "APISIX"
+    server_addr: "0.0.0.0:9080"
+  
+  # Request ID
+  request-id:
+    header_name: X-Request-Id
+    include_in_response: true
+  
+  # Error log
+  error-log-logger:
+    tcp:
+      host: "127.0.0.1"
+      port: 1234
+      tls: false
+      timeout: 1000
+      batch_max_size: 1000
+  
+  # Skywalking
+  skywalking:
+    service_name: "APISIX"
+    service_instance_name: "APISIX Instance 1"
+    endpoint_addr: "http://skywalking:12800"
+  
+  # CORS default config
+  cors:
+    allow_origins: "**"
+    allow_methods: "**"
+    allow_headers: "**"
+    max_age: 5
+    expose_headers: "**"
+    allow_credential: false
+
+# Stream proxy (for TCP/UDP)
+stream_plugins:
+  - mqtt-proxy
+  - ip-restriction
+  - limit-conn
+
+# Discovery
+discovery:
+  dns:
+    servers:
+      - "8.8.8.8"
+      - "114.114.114.114"
+

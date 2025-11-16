@@ -1,0 +1,58 @@
+# Build artifacts
+**/target/
+**/*.jar
+**/*.war
+**/*.ear
+**/*.class
+
+# Logs
+**/*.log
+**/logs/
+gateway/apisix/logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.egg-info/
+venv/
+env/
+
+# Angular
+frontend/admin-portal/.angular/
+frontend/admin-portal/dist/
+.sass-cache/
+
+# Flutter/Dart
+**/build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temp files
+*.tmp
+*.temp
+*.bak
+*.pid
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3

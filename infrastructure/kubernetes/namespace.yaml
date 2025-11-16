@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kado24-production
+  labels:
+    name: kado24-production
+    environment: production
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

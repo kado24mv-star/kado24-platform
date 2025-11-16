@@ -1,0 +1,68 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: order-service
+  
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:${DB_HOST:localhost}}:${POSTGRES_PORT:${DB_PORT:5432}}/${POSTGRES_DB:${DB_NAME:kado24_db}}?currentSchema=order_schema
+    username: ${POSTGRES_USER:${DB_USER:kado24_user}}
+    password: ${POSTGRES_PASSWORD:${DB_PASSWORD:kado24_pass}}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 3
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:kado24_redis_pass}
+      timeout: 60000ms
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+jwt:
+  secret: kado24-secret-key-change-this-in-production-minimum-256-bits-required-for-security
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+logging:
+  level:
+    com.kado24: DEBUG
+
+services:
+  wallet:
+    base-url: ${WALLET_SERVICE_BASE_URL:http://localhost:8086}
+    issue-path: ${WALLET_SERVICE_ISSUE_PATH:/api/v1/wallet/internal/issue}
+    internal-secret: ${INTERNAL_SERVICE_SECRET:kado24-internal-secret}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+info:
+  app:
+    name: Kado24 Order Service
+    description: Order processing and commission calculation
+    version: 1.0.0
+
+
+
+
+
+
+
+
+
+
+

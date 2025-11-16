@@ -1,0 +1,40 @@
+# Production Profile Configuration
+
+spring:
+  jpa:
+    show-sql: false
+  
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+
+logging:
+  level:
+    root: WARN
+    com.kado24: INFO
+    org.springframework.security: INFO
+    org.springframework.web: WARN
+    org.hibernate.SQL: WARN
+
+# Production mode - don't return OTP in response
+otp:
+  dev-mode: false
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

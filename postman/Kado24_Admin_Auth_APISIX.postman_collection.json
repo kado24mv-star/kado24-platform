@@ -1,0 +1,54 @@
+{
+	"info": {
+		"name": "Kado24 - Admin Auth (APISIX)",
+		"_postman_id": "d8d3d7a6-3a9f-4f07-9e7d-5b8f6f0a6a01",
+		"description": "Register and login admin via APISIX gateway.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{ "key": "baseUrl", "value": "http://localhost:9080" },
+		{ "key": "adminEmail", "value": "admin@kado24.com" },
+		{ "key": "adminPassword", "value": "Admin@123456" },
+		{ "key": "adminPhone", "value": "+85512340001" }
+	],
+	"item": [
+		{
+			"name": "Register Admin",
+			"request": {
+				"method": "POST",
+				"header": [ { "key": "Content-Type", "value": "application/json" } ],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/auth/register",
+					"host": [ "{{baseUrl}}" ],
+					"path": [ "api", "v1", "auth", "register" ]
+				},
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"fullName\": \"Admin User\",\n  \"phoneNumber\": \"{{adminPhone}}\",\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\",\n  \"role\": \"ADMIN\"\n}"
+				},
+				"description": "Creates an admin user account via the gateway."
+			},
+			"response": []
+		},
+		{
+			"name": "Login Admin",
+			"request": {
+				"method": "POST",
+				"header": [ { "key": "Content-Type", "value": "application/json" } ],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/auth/login",
+					"host": [ "{{baseUrl}}" ],
+					"path": [ "api", "v1", "auth", "login" ]
+				},
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"identifier\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+				},
+				"description": "Logs in as admin and returns access/refresh tokens."
+			},
+			"response": []
+		}
+	]
+}
+
+

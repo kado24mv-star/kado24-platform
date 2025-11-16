@@ -1,0 +1,42 @@
+server:
+  port: 8092
+spring:
+  application:
+    name: payout-service
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:${DB_HOST:localhost}}:${POSTGRES_PORT:${DB_PORT:5432}}/${POSTGRES_DB:${DB_NAME:kado24_db}}?currentSchema=payout_schema
+    username: ${POSTGRES_USER:${DB_USER:kado24_user}}
+    password: ${POSTGRES_PASSWORD:${DB_PASSWORD:kado24_pass}}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 3
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:kado24_redis_pass}
+      timeout: 60000ms
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+logging:
+  level:
+    com.kado24: DEBUG
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kado24-config
+  namespace: kado24-production
+data:
+  # Database Configuration
+  POSTGRES_HOST: "postgres-service"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "kado24_db"
+  POSTGRES_USER: "kado24_user"
+  POSTGRES_PASSWORD: "kado24_pass"
+  # Backwards compatibility (older deployments still reading DB_* vars)
+  DB_HOST: "postgres-service"
+  DB_PORT: "5432"
+  DB_NAME: "kado24_db"
+  DB_USER: "kado24_user"
+  DB_PASSWORD: "kado24_pass"
+  
+  # Redis Configuration
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  
+  # Kafka Configuration
+  KAFKA_BOOTSTRAP_SERVERS: "kafka-service:9092"
+  
+  # Application Configuration
+  SPRING_PROFILES_ACTIVE: "prod"
+  LOG_LEVEL: "INFO"
+
+
+
+
+
+
+
+
+
+
+

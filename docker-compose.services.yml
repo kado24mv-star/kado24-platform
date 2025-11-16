@@ -1,0 +1,344 @@
+name: kado24-platform
+
+x-backend-env: &backend-env
+  POSTGRES_HOST: host.docker.internal
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: kado24_db
+  POSTGRES_USER: kado24_user
+  POSTGRES_PASSWORD: kado24_pass
+  REDIS_HOST: kado24-redis
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: kado24_redis_pass
+  KAFKA_BOOTSTRAP_SERVERS: kado24-kafka:9093
+  SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "3"
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: kado24-redis
+    command: redis-server --requirepass kado24_redis_pass --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - kado24-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: kado24-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_log:/var/lib/zookeeper/log
+    networks:
+      - kado24-network
+    restart: unless-stopped
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kado24-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kado24-kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - kado24-network
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kado24-kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "9000:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: kado24-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kado24-kafka:9093
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - kado24-network
+    restart: unless-stopped
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.9
+    container_name: kado24-etcd
+    command:
+      - etcd
+      - --advertise-client-urls=http://0.0.0.0:2379
+      - --listen-client-urls=http://0.0.0.0:2379
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    volumes:
+      - etcd_data:/bitnami/etcd
+    networks:
+      - kado24-network
+    restart: unless-stopped
+
+  apisix:
+    image: apache/apisix:3.7.0-debian
+    container_name: kado24-apisix
+    depends_on:
+      - etcd
+    ports:
+      - "9080:9080"
+      - "9091:9091"
+      - "9443:9443"
+    volumes:
+      - ./gateway/apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+      - ./gateway/apisix/logs:/usr/local/apisix/logs
+    networks:
+      - kado24-network
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: kado24-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - kado24-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: kado24-grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/docker/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - kado24-network
+    restart: unless-stopped
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: kado24-redis-commander
+    depends_on:
+      - redis
+    ports:
+      - "8090:8081"
+    environment:
+      REDIS_HOSTS: local:kado24-redis:6379:0:kado24_redis_pass
+    networks:
+      - kado24-network
+    restart: unless-stopped
+
+  auth-service:
+    container_name: kado24-auth-service
+    build:
+      context: ./backend/services/auth-service
+    image: kado24/auth-service:latest
+    ports:
+      - "8081:8081"
+    environment:
+      <<: *backend-env
+    networks:
+      - kado24-network
+
+  user-service:
+    container_name: kado24-user-service
+    build:
+      context: ./backend/services/user-service
+    image: kado24/user-service:latest
+    ports:
+      - "8082:8082"
+    environment:
+      <<: *backend-env
+    networks:
+      - kado24-network
+
+  voucher-service:
+    container_name: kado24-voucher-service
+    build:
+      context: ./backend/services/voucher-service
+    image: kado24/voucher-service:latest
+    ports:
+      - "8083:8083"
+    environment:
+      <<: *backend-env
+    networks:
+      - kado24-network
+
+  order-service:
+    container_name: kado24-order-service
+    build:
+      context: ./backend/services/order-service
+    image: kado24/order-service:latest
+    ports:
+      - "8084:8084"
+    environment:
+      <<: *backend-env
+      WALLET_SERVICE_BASE_URL: http://kado24-wallet-service:8086
+      SERVICES_VOUCHER_BASE_URL: http://kado24-voucher-service:8083
+    networks:
+      - kado24-network
+
+  wallet-service:
+    container_name: kado24-wallet-service
+    build:
+      context: ./backend/services/wallet-service
+    image: kado24/wallet-service:latest
+    ports:
+      - "8086:8086"
+    environment:
+      <<: *backend-env
+      SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_LOB_NON_CONTEXTUAL_CREATION: "true"
+    networks:
+      - kado24-network
+
+  redemption-service:
+    container_name: kado24-redemption-service
+    build:
+      context: ./backend/services/redemption-service
+    image: kado24/redemption-service:latest
+    ports:
+      - "8087:8087"
+    environment:
+      <<: *backend-env
+    networks:
+      - kado24-network
+
+  merchant-service:
+    container_name: kado24-merchant-service
+    build:
+      context: ./backend/services/merchant-service
+    image: kado24/merchant-service:latest
+    ports:
+      - "8088:8088"
+    environment:
+      <<: *backend-env
+      SERVICES_PAYOUT_BASE_URL: http://kado24-payout-service:8092
+    networks:
+      - kado24-network
+
+  admin-portal-backend:
+    container_name: kado24-admin-portal-backend
+    build:
+      context: ./backend/services/admin-portal-backend
+    image: kado24/admin-portal-backend:latest
+    ports:
+      - "8089:8089"
+    environment:
+      <<: *backend-env
+    networks:
+      - kado24-network
+
+  notification-service:
+    container_name: kado24-notification-service
+    build:
+      context: ./backend/services/notification-service
+    image: kado24/notification-service:latest
+    ports:
+      - "8091:8091"
+    environment:
+      <<: *backend-env
+    networks:
+      - kado24-network
+
+  payout-service:
+    container_name: kado24-payout-service
+    build:
+      context: ./backend/services/payout-service
+    image: kado24/payout-service:latest
+    ports:
+      - "8092:8092"
+    environment:
+      <<: *backend-env
+    networks:
+      - kado24-network
+
+  analytics-service:
+    container_name: kado24-analytics-service
+    build:
+      context: ./backend/services/analytics-service
+    image: kado24/analytics-service:latest
+    ports:
+      - "8093:8093"
+    environment:
+      <<: *backend-env
+    networks:
+      - kado24-network
+
+  payment-service:
+    container_name: kado24-payment-service
+    build:
+      context: ./backend/services/mock-payment-service
+    image: kado24/payment-service:latest
+    ports:
+      - "8085:8085"
+    environment:
+      <<: *backend-env
+      SERVER_PORT: "8085"
+    networks:
+      - kado24-network
+
+volumes:
+  redis_data:
+    name: kado24_redis_data
+  zookeeper_data:
+    name: kado24_zookeeper_data
+  zookeeper_log:
+    name: kado24_zookeeper_log
+  kafka_data:
+    name: kado24_kafka_data
+  etcd_data:
+    name: kado24_etcd_data
+  prometheus_data:
+    name: kado24_prometheus_data
+  grafana_data:
+    name: kado24_grafana_data
+
+networks:
+  kado24-network:
+    name: kado24-network
+    driver: bridge
+

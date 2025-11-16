@@ -1,0 +1,73 @@
+{
+	"info": {
+		"name": "APISIX - Configure Admin Portal Routes",
+		"_postman_id": "a2df1f6a-7c2f-4a9a-8f52-7d2a2f6e2b11",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"description": "One-click setup: creates upstream and routes for admin portal via APISIX."
+	},
+	"variable": [
+		{ "key": "adminApi", "value": "http://localhost:9091/apisix/admin" },
+		{ "key": "apiKey",   "value": "edd1c9f034335f136f87ad84b625c8f1" }
+	],
+	"item": [
+		{
+			"name": "Upstream: admin-portal-backend-upstream",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{ "key": "X-API-KEY", "value": "{{apiKey}}" },
+					{ "key": "Content-Type", "value": "application/json" }
+				],
+				"url": {
+					"raw": "{{adminApi}}/upstreams/admin-portal-backend-upstream",
+					"host": ["{{adminApi}}"],
+					"path": ["upstreams","admin-portal-backend-upstream"]
+				},
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"type\": \"roundrobin\",\n  \"nodes\": { \"kado24-admin-portal-backend:8089\": 1 }\n}"
+				}
+			}
+		},
+		{
+			"name": "Route 121: admin-portal-preflight (OPTIONS)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{ "key": "X-API-KEY", "value": "{{apiKey}}" },
+					{ "key": "Content-Type", "value": "application/json" }
+				],
+				"url": {
+					"raw": "{{adminApi}}/routes/121",
+					"host": ["{{adminApi}}"],
+					"path": ["routes","121"]
+				},
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"admin-portal-preflight\",\n  \"uri\": \"/api/admin/*\",\n  \"methods\": [\"OPTIONS\"],\n  \"priority\": 10000,\n  \"plugins\": {\n    \"cors\": {\n      \"allow_origins\": \"http://localhost:4200\",\n      \"allow_methods\": \"GET,POST,PUT,DELETE,PATCH,OPTIONS\",\n      \"allow_headers\": \"Authorization,Content-Type,Accept\",\n      \"expose_headers\": \"Authorization,Content-Type,Accept\",\n      \"max_age\": 3600,\n      \"allow_credential\": true\n    },\n    \"echo\": { \"body\": \"\" }\n  }\n}"
+				}
+			}
+		},
+		{
+			"name": "Route 120: admin-portal-backend-route",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{ "key": "X-API-KEY", "value": "{{apiKey}}" },
+					{ "key": "Content-Type", "value": "application/json" }
+				],
+				"url": {
+					"raw": "{{adminApi}}/routes/120",
+					"host": ["{{adminApi}}"],
+					"path": ["routes","120"]
+				},
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"admin-portal-backend-route\",\n  \"uri\": \"/api/admin/*\",\n  \"methods\": [\"GET\",\"POST\",\"PUT\",\"DELETE\",\"PATCH\",\"OPTIONS\"],\n  \"upstream_id\": \"admin-portal-backend-upstream\",\n  \"plugins\": {\n    \"jwt-auth\": {},\n    \"cors\": {\n      \"allow_origins\": \"http://localhost:4200\",\n      \"allow_methods\": \"GET,POST,PUT,DELETE,PATCH,OPTIONS\",\n      \"allow_headers\": \"Authorization,Content-Type,Accept\",\n      \"expose_headers\": \"Authorization,Content-Type,Accept\",\n      \"max_age\": 3600,\n      \"allow_credential\": true\n    },\n    \"proxy-rewrite\": { \"regex_uri\": [\"^/api/admin/(.*)\", \"/api/v1/admin/$1\"] }\n  }\n}"
+				}
+			}
+		}
+	]
+}
+
+

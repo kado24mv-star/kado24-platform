@@ -1,0 +1,2894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kado24 Cambodia - Merged Wireframes (Organized by Role)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #333;
+        }
+        
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .header p {
+            font-size: 18px;
+            color: #7f8c8d;
+        }
+        
+        .priority-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+        
+        .critical { background: #e74c3c; color: white; }
+        .high { background: #f39c12; color: white; }
+        .medium { background: #3498db; color: white; }
+        .new { background: #27ae60; color: white; }
+        
+        .wireframe-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .app-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 4px solid #3498db;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .subsection-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #34495e;
+            margin: 40px 0 20px 0;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .flow-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #3498db;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .feature-description {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .feature-description h4 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .feature-description p {
+            color: #7f8c8d;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .screens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        .screen {
+            border: 2px solid #34495e;
+            border-radius: 20px;
+            padding: 15px;
+            background: #fff;
+            min-height: 450px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .screen:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .screen-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+            background: #ecf0f1;
+            padding: 8px;
+            border-radius: 8px;
+        }
+        
+        .status-bar {
+            height: 20px;
+            background: #34495e;
+            margin: -15px -15px 15px -15px;
+            border-radius: 18px 18px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+            color: white;
+            font-size: 10px;
+        }
+        
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #bdc3c7;
+            margin-bottom: 15px;
+        }
+        
+        .back-btn, .menu-btn {
+            width: 30px;
+            height: 20px;
+            background: #95a5a6;
+            border-radius: 4px;
+        }
+        
+        .page-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+        
+        .content-area {
+            min-height: 280px;
+        }
+        
+        .button {
+            background: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin: 8px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .button:hover {
+            background: #2980b9;
+        }
+        
+        .button.secondary {
+            background: #95a5a6;
+        }
+        
+        .button.danger {
+            background: #e74c3c;
+        }
+        
+        .button.success {
+            background: #27ae60;
+        }
+        
+        .button.outline {
+            background: white;
+            color: #3498db;
+            border: 2px solid #3498db;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            margin: 5px 0;
+            font-size: 13px;
+        }
+        
+        .search-bar {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .filter-chip {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #ecf0f1;
+            border-radius: 16px;
+            font-size: 11px;
+            margin: 4px;
+            cursor: pointer;
+            border: 1px solid #bdc3c7;
+        }
+        
+        .filter-chip.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .voucher-card {
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #ecf0f1;
+        }
+        
+        .voucher-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        
+        .voucher-price {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .qr-placeholder {
+            width: 120px;
+            height: 120px;
+            background: #34495e;
+            margin: 15px auto;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .scanner-frame {
+            width: 150px;
+            height: 150px;
+            border: 3px solid #e74c3c;
+            border-radius: 8px;
+            margin: 20px auto;
+            position: relative;
+            background: #f8f9fa;
+        }
+        
+        .flow-indicator {
+            background: #3498db;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .stat-box {
+            background: #ecf0f1;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #7f8c8d;
+        }
+        
+        .metric-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            font-size: 11px;
+            color: #7f8c8d;
+        }
+        
+        .rating-stars {
+            color: #f39c12;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        
+        .tab-bar {
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid #bdc3c7;
+            padding-top: 10px;
+            margin-top: 15px;
+        }
+        
+        .tab-item {
+            text-align: center;
+            font-size: 11px;
+            color: #95a5a6;
+        }
+        
+        .tab-item.active {
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎁 Kado24 Cambodia</h1>
+        <p>Complete Wireframes - Organized by User Role & Flow</p>
+        <div>
+            <span class="priority-badge critical">CRITICAL</span>
+            <span class="priority-badge high">HIGH PRIORITY</span>
+            <span class="priority-badge medium">MEDIUM</span>
+            <span class="priority-badge new">NEW FEATURE</span>
+        </div>
+    </div>
+
+    <div class="wireframe-container">
+        <!-- =================================================== -->
+        <!-- CONSUMER APP SECTION -->
+        <!-- =================================================== -->
+        <div class="app-section">
+            <h2 class="section-title">📱 Consumer App Screens</h2>
+            <p class="section-subtitle">Complete user journey from discovery to redemption</p>
+
+            <!-- 1. AUTHENTICATION -->
+            <div class="subsection-title">
+                <span class="flow-number">1</span> Authentication
+            </div>
+            <div class="feature-description">
+                <h4>🔐 Sign In & Sign Up</h4>
+                <p>Separate authentication flows for new and returning users</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Sign In Screen -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>🔋 100%</span>
+                    </div>
+                    <div class="screen-title">🔐 Sign In</div>
+                    <div class="content-area">
+                        <div style="text-align: center; margin: 30px 0;">
+                            <div style="font-size: 48px; margin-bottom: 10px;">🎁</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #2c3e50;">Kado24</div>
+                            <div style="font-size: 12px; color: #7f8c8d;">Welcome Back!</div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Phone Number</div>
+                            <input class="input-field" type="tel" placeholder="+855 12 XXX XXX" style="margin: 0;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Password</div>
+                            <input class="input-field" type="password" placeholder="Enter your password" style="margin: 0;">
+                        </div>
+                        <div style="text-align: right; margin-bottom: 15px;">
+                            <a href="#" style="font-size: 11px; color: #3498db; text-decoration: none;">Forgot Password?</a>
+                        </div>
+                        <button class="button">Sign In</button>
+                        <div style="text-align: center; margin: 15px 0; color: #7f8c8d; font-size: 12px;">Or sign in with</div>
+                        <button class="button secondary">Continue with Facebook</button>
+                        <button class="button secondary">Continue with Google</button>
+                        <div style="text-align: center; margin-top: 20px; font-size: 12px;">
+                            <span style="color: #7f8c8d;">Don't have an account? </span>
+                            <a href="#" style="color: #3498db; font-weight: bold; text-decoration: none;">Sign Up</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sign Up Screen -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:42</span>
+                        <span>🔋 99%</span>
+                    </div>
+                    <div class="screen-title">✍️ Sign Up</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Create Account</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Full Name *</div>
+                            <input class="input-field" type="text" placeholder="Enter your full name" style="margin: 0;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Phone Number *</div>
+                            <input class="input-field" type="tel" placeholder="+855 12 XXX XXX" style="margin: 0;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Email (Optional)</div>
+                            <input class="input-field" type="email" placeholder="your@email.com" style="margin: 0;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Password *</div>
+                            <input class="input-field" type="password" placeholder="Minimum 8 characters" style="margin: 0;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Confirm Password *</div>
+                            <input class="input-field" type="password" placeholder="Re-enter password" style="margin: 0;">
+                        </div>
+                        <div style="font-size: 11px; color: #7f8c8d; margin-bottom: 15px; line-height: 1.5;">
+                            <input type="checkbox" style="margin-right: 5px;">
+                            I agree to the <a href="#" style="color: #3498db;">Terms of Service</a> and <a href="#" style="color: #3498db;">Privacy Policy</a>
+                        </div>
+                        <button class="button">Create Account</button>
+                        <div style="text-align: center; margin-top: 15px; font-size: 12px;">
+                            <span style="color: #7f8c8d;">Already have an account? </span>
+                            <a href="#" style="color: #3498db; font-weight: bold; text-decoration: none;">Sign In</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OTP Verification -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:44</span>
+                        <span>🔋 98%</span>
+                    </div>
+                    <div class="screen-title">📱 OTP Verification</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Verify Phone</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="text-align: center; margin: 20px 0; color: #7f8c8d; font-size: 13px;">
+                            Enter the 6-digit code sent to<br>
+                            <strong style="color: #2c3e50;">+855 12 345 678</strong>
+                        </div>
+                        <div style="display: flex; justify-content: center; gap: 8px; margin: 30px 0;">
+                            <input class="input-field" style="width: 40px; text-align: center; font-size: 20px;" maxlength="1" value="1">
+                            <input class="input-field" style="width: 40px; text-align: center; font-size: 20px;" maxlength="1" value="2">
+                            <input class="input-field" style="width: 40px; text-align: center; font-size: 20px;" maxlength="1" value="3">
+                            <input class="input-field" style="width: 40px; text-align: center; font-size: 20px;" maxlength="1" value="4">
+                            <input class="input-field" style="width: 40px; text-align: center; font-size: 20px;" maxlength="1">
+                            <input class="input-field" style="width: 40px; text-align: center; font-size: 20px;" maxlength="1">
+                        </div>
+                        <button class="button">Verify & Continue</button>
+                        <div style="text-align: center; margin-top: 15px; font-size: 12px;">
+                            <span style="color: #7f8c8d;">Didn't receive code?</span>
+                            <span style="color: #3498db; font-weight: bold; cursor: pointer;"> Resend (45s)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. DISCOVERY & BROWSE -->
+            <div class="subsection-title">
+                <span class="flow-number">2</span> Discovery & Browse
+            </div>
+            <div class="feature-description">
+                <h4>🔍 Search & Discovery System</h4>
+                <p><span class="priority-badge critical">CRITICAL</span> Core feature allowing users to find vouchers through search, filters, categories, and map view</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Home/Browse -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>🔋 100%</span>
+                    </div>
+                    <div class="screen-title">🏠 Home / Browse</div>
+                    <div class="header-bar">
+                        <div></div>
+                        <div class="page-title">Kado24</div>
+                        <div class="menu-btn"></div>
+                    </div>
+                    <div class="content-area">
+                        <input class="search-bar" placeholder="🔍 Search restaurants, spas, activities...">
+                        <div style="margin-bottom: 12px;">
+                            <div class="filter-chip active">🍽️ Food & Drink</div>
+                            <div class="filter-chip">💆 Spa & Wellness</div>
+                            <div class="filter-chip">🎭 Entertainment</div>
+                            <div class="filter-chip">🛍️ Shopping</div>
+                        </div>
+                        
+                        <div style="font-weight: bold; margin: 15px 0 10px 0; font-size: 13px;">Featured Vouchers</div>
+                        <div class="voucher-card">
+                            <div class="voucher-title">Brown Coffee - Drink Voucher</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                <div class="voucher-price">$5 - $25</div>
+                                <div class="rating-stars">⭐ 4.8 (234)</div>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d; margin-top: 5px;">Valid 12 months • Redeemable anytime</div>
+                        </div>
+                        
+                        <div class="voucher-card">
+                            <div class="voucher-title">Sokha Hotel - Spa Treatment</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                <div class="voucher-price">$30 - $100</div>
+                                <div class="rating-stars">⭐ 4.9 (187)</div>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d; margin-top: 5px;">Valid 6 months • Book in advance</div>
+                        </div>
+                    </div>
+                    <div class="tab-bar">
+                        <div class="tab-item active">🏠<br>Home</div>
+                        <div class="tab-item">🗺️<br>Map</div>
+                        <div class="tab-item">🎁<br>Wallet</div>
+                        <div class="tab-item">👤<br>Profile</div>
+                    </div>
+                </div>
+
+                <!-- Search Results -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:43</span>
+                        <span>🔋 98%</span>
+                    </div>
+                    <div class="screen-title">🔍 Search Results</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Search: "coffee"</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px; font-size: 11px;">
+                            <button class="button outline" style="padding: 6px 12px; margin: 0;">Sort: Popular</button>
+                            <button class="button outline" style="padding: 6px 12px; margin: 0;">Price</button>
+                            <button class="button outline" style="padding: 6px 12px; margin: 0;">Distance</button>
+                            <button class="button outline" style="padding: 6px 12px; margin: 0;">Rating</button>
+                        </div>
+                        
+                        <div style="font-size: 12px; color: #7f8c8d; margin-bottom: 10px;">Found 23 vouchers</div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 13px;">Brown Coffee</div>
+                                    <div class="rating-stars">⭐ 4.8 (234)</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">1.2 km away</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div class="voucher-price" style="font-size: 14px;">$5-$25</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 13px;">Amazon Coffee</div>
+                                    <div class="rating-stars">⭐ 4.6 (156)</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">2.5 km away</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div class="voucher-price" style="font-size: 14px;">$4-$20</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 13px;">Costa Coffee</div>
+                                    <div class="rating-stars">⭐ 4.7 (98)</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">0.8 km away</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div class="voucher-price" style="font-size: 14px;">$6-$30</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map View -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:44</span>
+                        <span>🔋 97%</span>
+                    </div>
+                    <div class="screen-title">🗺️ Map View</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Nearby Merchants</div>
+                        <div class="menu-btn"></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="background: #e0e0e0; height: 200px; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative;">
+                            <div style="text-align: center; color: #7f8c8d;">
+                                📍 MAP VIEW<br>
+                                <div style="font-size: 11px; margin-top: 5px;">Showing merchants within 5km</div>
+                            </div>
+                            <!-- Map Pins -->
+                            <div style="position: absolute; top: 30px; left: 60px; font-size: 24px;">📍</div>
+                            <div style="position: absolute; top: 80px; right: 50px; font-size: 24px;">📍</div>
+                            <div style="position: absolute; bottom: 40px; left: 40px; font-size: 24px;">📍</div>
+                        </div>
+                        
+                        <div style="margin-top: 15px;">
+                            <div class="filter-chip active">🍽️ Food</div>
+                            <div class="filter-chip">💆 Spa</div>
+                            <div class="filter-chip">🎭 Fun</div>
+                        </div>
+                        
+                        <div style="margin-top: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">Near You</div>
+                            <div class="card">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <div style="font-weight: bold; font-size: 13px;">Brown Coffee</div>
+                                        <div style="font-size: 11px; color: #7f8c8d;">0.8 km • Open now</div>
+                                    </div>
+                                    <button class="button" style="padding: 6px 12px; margin: 0; width: auto;">View</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-bar">
+                        <div class="tab-item">🏠<br>Home</div>
+                        <div class="tab-item active">🗺️<br>Map</div>
+                        <div class="tab-item">🎁<br>Wallet</div>
+                        <div class="tab-item">👤<br>Profile</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. VOUCHER DETAILS & RATINGS -->
+            <div class="subsection-title">
+                <span class="flow-number">3</span> Voucher Details & Reviews
+            </div>
+            <div class="feature-description">
+                <h4>⭐ Ratings & Reviews System</h4>
+                <p><span class="priority-badge critical">CRITICAL</span> Trust-building feature with merchant ratings, customer reviews, and photo uploads</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Voucher Details -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:42</span>
+                        <span>🔋 99%</span>
+                    </div>
+                    <div class="screen-title">📄 Voucher Details</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Brown Coffee</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="voucher-card">
+                            <div class="voucher-title">Coffee Voucher</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin: 8px 0;">
+                                <div class="voucher-price">$5 - $25</div>
+                                <div class="rating-stars">⭐ 4.8 (234 reviews)</div>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d; margin-top: 8px;">
+                                ✓ Valid for 12 months<br>
+                                ✓ Redeemable anytime<br>
+                                ✓ All menu items<br>
+                                ✓ 15 locations in Phnom Penh
+                            </div>
+                        </div>
+                        <button class="button">Buy Now</button>
+                        <button class="button outline">🎁 Send as Gift</button>
+                        
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 8px;">About Brown Coffee</div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.6;">
+                                Cambodia's favorite coffee chain with premium beans and cozy atmosphere. Perfect for meetings or relaxation.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews List -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:45</span>
+                        <span>🔋 96%</span>
+                    </div>
+                    <div class="screen-title">⭐ Customer Reviews</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Brown Coffee Reviews</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 12px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #2c3e50;">4.8</div>
+                            <div class="rating-stars" style="font-size: 16px;">⭐⭐⭐⭐⭐</div>
+                            <div style="font-size: 11px; color: #7f8c8d; margin-top: 4px;">Based on 234 reviews</div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div style="font-weight: bold; font-size: 12px;">Sopheak K.</div>
+                                <div class="rating-stars" style="font-size: 12px;">⭐⭐⭐⭐⭐</div>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.5;">
+                                Great coffee and service! The voucher was easy to use. Highly recommend for coffee lovers.
+                            </div>
+                            <div style="font-size: 10px; color: #95a5a6; margin-top: 6px;">2 days ago</div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div style="font-weight: bold; font-size: 12px;">Lisa M.</div>
+                                <div class="rating-stars" style="font-size: 12px;">⭐⭐⭐⭐</div>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.5;">
+                                Nice atmosphere. Redemption process was smooth. Will buy again!
+                            </div>
+                            <div style="font-size: 10px; color: #95a5a6; margin-top: 6px;">1 week ago</div>
+                        </div>
+                        
+                        <button class="button outline">View All Reviews (234)</button>
+                    </div>
+                </div>
+
+                <!-- Write Review -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:46</span>
+                        <span>🔋 95%</span>
+                    </div>
+                    <div class="screen-title">✍️ Write Review</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Rate Your Experience</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="text-align: center; margin: 20px 0;">
+                            <div style="font-size: 13px; font-weight: bold; margin-bottom: 10px;">Brown Coffee</div>
+                            <div style="font-size: 36px; margin: 15px 0;">⭐⭐⭐⭐⭐</div>
+                            <div style="font-size: 11px; color: #7f8c8d;">Tap to rate</div>
+                        </div>
+                        
+                        <textarea class="input-field" rows="4" placeholder="Share your experience with this merchant..."></textarea>
+                        
+                        <div style="margin: 15px 0;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">Add Photos (Optional)</div>
+                            <div style="display: flex; gap: 8px;">
+                                <div style="width: 60px; height: 60px; background: #ecf0f1; border: 2px dashed #bdc3c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                    <span style="font-size: 24px;">📷</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="button">Submit Review</button>
+                        <button class="button outline">Skip for Now</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. PURCHASE FLOW -->
+            <div class="subsection-title">
+                <span class="flow-number">4</span> Purchase & Payment
+            </div>
+            <div class="feature-description">
+                <h4>💳 Payment Management</h4>
+                <p><span class="priority-badge high">HIGH</span> Integrated payment system supporting multiple payment methods (ABA Pay, Wing, Pi Pay, Cards)</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Purchase Selection -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:43</span>
+                        <span>🔋 98%</span>
+                    </div>
+                    <div class="screen-title">💰 Purchase Voucher</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Select Amount</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="voucher-card">
+                            <div class="voucher-title">Brown Coffee - Drink Voucher</div>
+                            <div style="font-size: 11px; color: #7f8c8d; margin-top: 4px;">Choose voucher value</div>
+                        </div>
+                        
+                        <div style="margin: 15px 0;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 10px;">Select Value</div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                                <button class="button outline" style="margin: 0;">$5</button>
+                                <button class="button outline" style="margin: 0;">$10</button>
+                                <button class="button" style="margin: 0;">$15</button>
+                                <button class="button outline" style="margin: 0;">$20</button>
+                                <button class="button outline" style="margin: 0;">$25</button>
+                                <button class="button outline" style="margin: 0;">Custom</button>
+                            </div>
+                        </div>
+                        
+                        <div style="margin: 15px 0;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 10px;">Quantity</div>
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+                                <button class="button outline" style="width: 40px; margin: 0;">-</button>
+                                <div style="font-size: 24px; font-weight: bold;">1</div>
+                                <button class="button outline" style="width: 40px; margin: 0;">+</button>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin: 15px 0;">
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                                <span>Subtotal:</span>
+                                <span>$15.00</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e0e0e0;">
+                                <span>Total:</span>
+                                <span>$15.00</span>
+                            </div>
+                        </div>
+                        
+                        <button class="button">Continue to Payment</button>
+                    </div>
+                </div>
+
+                <!-- Payment Method Selection -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:44</span>
+                        <span>🔋 97%</span>
+                    </div>
+                    <div class="screen-title">💳 Payment Method</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Select Payment</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="font-weight: bold; margin-bottom: 10px; font-size: 13px;">Choose Payment Method</div>
+                        
+                        <div class="card" style="cursor: pointer; border: 2px solid #3498db; background: #e8f4f8;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="font-size: 24px;">🏦</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 13px;">ABA Pay</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">Fast & Secure</div>
+                                </div>
+                                <div style="font-size: 18px;">✓</div>
+                            </div>
+                        </div>
+                        
+                        <div class="card" style="cursor: pointer;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="font-size: 24px;">🦅</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 13px;">Wing Money</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">Popular in Cambodia</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card" style="cursor: pointer;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="font-size: 24px;">🥧</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 13px;">Pi Pay</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">Mobile Payment</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card" style="cursor: pointer;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="font-size: 24px;">💳</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 13px;">Credit/Debit Card</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">Visa, Mastercard</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 11px; color: #856404;">
+                            💡 <strong>Tip:</strong> Save your payment method for faster checkout next time
+                        </div>
+                        
+                        <button class="button">Pay $15.00</button>
+                    </div>
+                </div>
+
+                <!-- Payment Processing -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:45</span>
+                        <span>🔋 96%</span>
+                    </div>
+                    <div class="screen-title">⏳ Processing Payment</div>
+                    <div class="header-bar">
+                        <div></div>
+                        <div class="page-title">ABA Pay</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="text-align: center; margin: 40px 0;">
+                            <div style="font-size: 64px; margin-bottom: 20px; animation: pulse 1.5s infinite;">⏳</div>
+                            <div style="font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 10px;">Processing Payment...</div>
+                            <div style="font-size: 12px; color: #7f8c8d;">Please complete payment in ABA app</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                                <span>Merchant:</span>
+                                <span style="font-weight: bold;">Brown Coffee</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                                <span>Amount:</span>
+                                <span style="font-weight: bold;">$15.00</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                                <span>Transaction ID:</span>
+                                <span style="font-weight: bold; font-family: monospace;">TXN-2025-1234</span>
+                            </div>
+                        </div>
+                        
+                        <button class="button secondary" style="margin-top: 20px;">Cancel Payment</button>
+                    </div>
+                </div>
+
+                <!-- Purchase Success -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:46</span>
+                        <span>🔋 95%</span>
+                    </div>
+                    <div class="screen-title">✅ Purchase Complete</div>
+                    <div class="header-bar">
+                        <div></div>
+                        <div class="page-title">Success</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="text-align: center; margin: 30px 0;">
+                            <div style="font-size: 72px; margin-bottom: 15px;">🎉</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #27ae60; margin-bottom: 8px;">Payment Successful!</div>
+                            <div style="font-size: 12px; color: #7f8c8d;">Your voucher is now in your wallet</div>
+                        </div>
+                        
+                        <div class="voucher-card">
+                            <div class="voucher-title">Brown Coffee - $15 Voucher</div>
+                            <div style="font-size: 11px; color: #27ae60; margin-top: 5px;">✓ Ready to use</div>
+                        </div>
+                        
+                        <button class="button">View My Wallet</button>
+                        <button class="button outline">🎁 Gift This Voucher</button>
+                        <button class="button secondary">Continue Shopping</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. WALLET & MY VOUCHERS -->
+            <div class="subsection-title">
+                <span class="flow-number">5</span> My Wallet
+            </div>
+            <div class="feature-description">
+                <h4>🎁 Voucher Wallet Management</h4>
+                <p>Central hub for all purchased and received vouchers</p>
+            </div>
+            <div class="screens-grid">
+                <!-- My Wallet -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:47</span>
+                        <span>🔋 94%</span>
+                    </div>
+                    <div class="screen-title">🎁 My Wallet</div>
+                    <div class="header-bar">
+                        <div class="menu-btn"></div>
+                        <div class="page-title">My Vouchers</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                            <button class="button" style="flex: 1; padding: 8px; margin: 0;">Active (5)</button>
+                            <button class="button outline" style="flex: 1; padding: 8px; margin: 0;">Used (12)</button>
+                            <button class="button outline" style="flex: 1; padding: 8px; margin: 0;">Expired (2)</button>
+                        </div>
+                        
+                        <div class="voucher-card" style="border-color: #27ae60; background: #d4edda;">
+                            <div class="voucher-title">Brown Coffee - $15</div>
+                            <div style="font-size: 11px; color: #7f8c8d; margin-top: 5px;">
+                                Valid until: Dec 31, 2025<br>
+                                Purchased: Oct 28, 2025
+                            </div>
+                            <button class="button" style="margin-top: 10px; padding: 8px;">Use Now</button>
+                        </div>
+                        
+                        <div class="voucher-card">
+                            <div class="voucher-title">Sokha Hotel Spa - $50</div>
+                            <div style="font-size: 11px; color: #7f8c8d; margin-top: 5px;">
+                                Valid until: Mar 15, 2026<br>
+                                Gift from: Mom ❤️
+                            </div>
+                            <button class="button" style="margin-top: 10px; padding: 8px;">Use Now</button>
+                        </div>
+                        
+                        <div class="voucher-card">
+                            <div class="voucher-title">Pizza Palace - $20</div>
+                            <div style="font-size: 11px; color: #7f8c8d; margin-top: 5px;">
+                                Valid until: Nov 30, 2025<br>
+                                Purchased: Oct 15, 2025
+                            </div>
+                            <button class="button" style="margin-top: 10px; padding: 8px;">Use Now</button>
+                        </div>
+                    </div>
+                    <div class="tab-bar">
+                        <div class="tab-item">🏠<br>Home</div>
+                        <div class="tab-item">🗺️<br>Map</div>
+                        <div class="tab-item active">🎁<br>Wallet</div>
+                        <div class="tab-item">👤<br>Profile</div>
+                    </div>
+                </div>
+
+                <!-- Voucher Detail in Wallet -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:48</span>
+                        <span>🔋 93%</span>
+                    </div>
+                    <div class="screen-title">📱 Voucher Details</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Brown Coffee</div>
+                        <div class="menu-btn"></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="voucher-card" style="border-color: #27ae60; background: #d4edda;">
+                            <div style="text-align: center;">
+                                <div class="voucher-title" style="font-size: 16px;">Brown Coffee</div>
+                                <div class="voucher-price" style="font-size: 28px; margin: 10px 0;">$15.00</div>
+                                <div style="font-size: 11px; color: #7f8c8d;">
+                                    Valid until: Dec 31, 2025<br>
+                                    Voucher #: KC-2025-7891
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="qr-placeholder">
+                            QR CODE<br>
+                            FOR SCANNING
+                        </div>
+                        
+                        <div style="text-align: center; margin: 15px 0; font-size: 11px; color: #7f8c8d;">
+                            Show this QR code to the merchant<br>or scan merchant's QR code
+                        </div>
+                        
+                        <button class="button">📱 Scan Merchant QR</button>
+                        <button class="button outline">🎁 Gift This Voucher</button>
+                        <button class="button secondary">ℹ️ Redemption Locations</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. GIFTING FLOW -->
+            <div class="subsection-title">
+                <span class="flow-number">6</span> Gift Vouchers
+            </div>
+            <div class="feature-description">
+                <h4>🎁 Gift Sending Feature</h4>
+                <p>Allow users to send vouchers to friends and family via phone number or link</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Gift Voucher -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:49</span>
+                        <span>🔋 92%</span>
+                    </div>
+                    <div class="screen-title">🎁 Send as Gift</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Gift Voucher</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="voucher-card">
+                            <div class="voucher-title">Brown Coffee - $15</div>
+                            <div style="font-size: 11px; color: #7f8c8d;">You're gifting this voucher</div>
+                        </div>
+                        
+                        <div style="margin: 15px 0;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 8px;">Recipient's Phone Number</div>
+                            <input class="input-field" type="tel" placeholder="+855 12 345 678">
+                        </div>
+                        
+                        <div style="margin: 15px 0;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 8px;">Personal Message (Optional)</div>
+                            <textarea class="input-field" rows="3" placeholder="Happy Birthday! Enjoy your coffee! 🎉"></textarea>
+                        </div>
+                        
+                        <div style="margin: 15px 0;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 8px;">Schedule Delivery</div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="button" style="flex: 1; padding: 8px; margin: 0;">Send Now</button>
+                                <button class="button outline" style="flex: 1; padding: 8px; margin: 0;">Schedule</button>
+                            </div>
+                        </div>
+                        
+                        <button class="button success">Send Gift 🎁</button>
+                        <button class="button secondary">Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Gift Sent Confirmation -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:50</span>
+                        <span>🔋 91%</span>
+                    </div>
+                    <div class="screen-title">✅ Gift Sent!</div>
+                    <div class="header-bar">
+                        <div></div>
+                        <div class="page-title">Success</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="text-align: center; margin: 30px 0;">
+                            <div style="font-size: 72px; margin-bottom: 15px;">🎁</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #27ae60; margin-bottom: 8px;">Gift Sent Successfully!</div>
+                            <div style="font-size: 12px; color: #7f8c8d;">
+                                Recipient will receive an SMS notification
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="text-align: center;">
+                                <div style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">Brown Coffee - $15</div>
+                                <div style="font-size: 11px; color: #7f8c8d;">
+                                    Sent to: +855 12 345 678<br>
+                                    Sent on: Oct 28, 2025
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="button">Back to Wallet</button>
+                        <button class="button outline">Send Another Gift</button>
+                    </div>
+                </div>
+
+                <!-- Receive Gift -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>10:15</span>
+                        <span>🔋 85%</span>
+                    </div>
+                    <div class="screen-title">🎁 You Received a Gift!</div>
+                    <div class="content-area">
+                        <div style="text-align: center; margin: 30px 0;">
+                            <div style="font-size: 72px; margin-bottom: 15px;">🎉</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #2c3e50; margin-bottom: 8px;">You Got a Gift!</div>
+                            <div style="font-size: 12px; color: #7f8c8d;">Someone sent you a voucher</div>
+                        </div>
+                        
+                        <div class="voucher-card" style="border-color: #f39c12; background: #fff3cd;">
+                            <div style="text-align: center;">
+                                <div class="voucher-title">Brown Coffee</div>
+                                <div class="voucher-price" style="margin: 10px 0;">$15.00</div>
+                                <div style="font-size: 11px; color: #7f8c8d; margin-bottom: 10px;">
+                                    From: +855 12 XXX XXX<br>
+                                    Message: "Happy Birthday! Enjoy! 🎉"
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="button">Accept & Add to Wallet</button>
+                        <button class="button outline">Decline Gift</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. REDEMPTION FLOW -->
+            <div class="subsection-title">
+                <span class="flow-number">7</span> Redemption Process
+            </div>
+            <div class="feature-description">
+                <h4>📱 Dual QR Redemption System</h4>
+                <p>Flexible redemption: Consumer shows QR to merchant OR scans merchant's QR code</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Show QR to Merchant -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>11:30</span>
+                        <span>🔋 75%</span>
+                    </div>
+                    <div class="screen-title">📱 Ready to Redeem</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Show QR Code</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="flow-indicator">
+                            Show this to merchant
+                        </div>
+                        
+                        <div style="text-align: center; margin: 15px 0;">
+                            <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">Brown Coffee</div>
+                            <div class="voucher-price" style="font-size: 24px;">$15.00</div>
+                        </div>
+                        
+                        <div class="qr-placeholder" style="width: 180px; height: 180px; font-size: 14px;">
+                            VOUCHER<br>
+                            QR CODE
+                        </div>
+                        
+                        <div style="text-align: center; margin: 15px 0; font-size: 11px; color: #7f8c8d;">
+                            Voucher Code: KC-2025-7891<br>
+                            Valid until: Dec 31, 2025
+                        </div>
+                        
+                        <div style="background: #fff3cd; padding: 12px; border-radius: 8px; font-size: 11px; color: #856404;">
+                            💡 Merchant will scan this code to redeem
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scan Merchant QR -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>11:31</span>
+                        <span>🔋 74%</span>
+                    </div>
+                    <div class="screen-title">📸 Scan to Redeem</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Scan Merchant QR</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="flow-indicator">
+                            Scan merchant's QR code
+                        </div>
+                        
+                        <div class="scanner-frame" style="width: 200px; height: 200px;"></div>
+                        
+                        <div style="text-align: center; margin: 15px 0; font-size: 12px; color: #7f8c8d;">
+                            Point camera at merchant's QR code
+                        </div>
+                        
+                        <div class="voucher-card">
+                            <div class="voucher-title">Selected Voucher</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                <span style="font-size: 13px;">Brown Coffee</span>
+                                <span class="voucher-price" style="font-size: 14px;">$15.00</span>
+                            </div>
+                        </div>
+                        
+                        <button class="button secondary">💡 Turn on Flash</button>
+                    </div>
+                </div>
+
+                <!-- Redemption Confirmation -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>11:32</span>
+                        <span>🔋 73%</span>
+                    </div>
+                    <div class="screen-title">✅ Confirm Redemption</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Confirm</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="flow-indicator" style="background: #27ae60;">
+                            ✅ Ready to Redeem
+                        </div>
+                        
+                        <div class="voucher-card" style="border-color: #27ae60; background: #d4edda;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 10px;">☕</div>
+                                <div class="voucher-title" style="font-size: 16px;">Brown Coffee</div>
+                                <div class="voucher-price" style="font-size: 28px; margin: 10px 0;">$15.00</div>
+                                <div style="font-size: 11px; color: #7f8c8d;">
+                                    Location: BKK1 Branch<br>
+                                    Valid until: Dec 31, 2025
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin: 15px 0;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 8px;">Redemption Details</div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.6;">
+                                • This voucher will be marked as used<br>
+                                • Transaction will be recorded<br>
+                                • You can review merchant after redemption
+                            </div>
+                        </div>
+                        
+                        <button class="button success">✅ Confirm Redemption</button>
+                        <button class="button danger">❌ Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Redemption Success -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>11:33</span>
+                        <span>🔋 72%</span>
+                    </div>
+                    <div class="screen-title">🎉 Redemption Complete</div>
+                    <div class="header-bar">
+                        <div></div>
+                        <div class="page-title">Success</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="text-align: center; margin: 30px 0;">
+                            <div style="font-size: 72px; margin-bottom: 15px;">✅</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #27ae60; margin-bottom: 8px;">Redeemed Successfully!</div>
+                            <div style="font-size: 12px; color: #7f8c8d;">Enjoy your coffee at Brown Coffee</div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="text-align: center;">
+                                <div style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">Brown Coffee - $15</div>
+                                <div style="font-size: 11px; color: #7f8c8d;">
+                                    Redeemed at: BKK1 Branch<br>
+                                    Time: Oct 28, 2025 11:33 AM<br>
+                                    Transaction ID: TXN-2025-5678
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="button">⭐ Rate Your Experience</button>
+                        <button class="button outline">View Receipt</button>
+                        <button class="button secondary">Back to Wallet</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. TRANSACTION HISTORY -->
+            <div class="subsection-title">
+                <span class="flow-number">8</span> Transaction History
+            </div>
+            <div class="feature-description">
+                <h4>📜 Transaction History & Receipts</h4>
+                <p><span class="priority-badge high">HIGH</span> Complete audit trail of all purchases, gifts sent/received, and redemptions</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Transaction History -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>14:20</span>
+                        <span>🔋 68%</span>
+                    </div>
+                    <div class="screen-title">📜 Transaction History</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">My Transactions</div>
+                        <div class="menu-btn"></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="display: flex; gap: 8px; margin-bottom: 15px; font-size: 11px;">
+                            <button class="button" style="flex: 1; padding: 6px; margin: 0;">All</button>
+                            <button class="button outline" style="flex: 1; padding: 6px; margin: 0;">Purchases</button>
+                            <button class="button outline" style="flex: 1; padding: 6px; margin: 0;">Redemptions</button>
+                            <button class="button outline" style="flex: 1; padding: 6px; margin: 0;">Gifts</button>
+                        </div>
+                        
+                        <div style="font-size: 12px; font-weight: bold; margin: 15px 0 10px 0; color: #7f8c8d;">Today</div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: bold; font-size: 12px;">✅ Redeemed</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">Brown Coffee - $15</div>
+                                    <div style="font-size: 10px; color: #95a5a6;">11:33 AM</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 12px; color: #27ae60; font-weight: bold;">-$15.00</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: bold; font-size: 12px;">🎁 Gift Sent</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">Brown Coffee - $15</div>
+                                    <div style="font-size: 10px; color: #95a5a6;">9:50 AM</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 12px; color: #e74c3c; font-weight: bold;">-$15.00</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: bold; font-size: 12px;">💳 Purchase</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">Brown Coffee - $15</div>
+                                    <div style="font-size: 10px; color: #95a5a6;">9:46 AM</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 12px; color: #e74c3c; font-weight: bold;">-$15.00</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="font-size: 12px; font-weight: bold; margin: 15px 0 10px 0; color: #7f8c8d;">Yesterday</div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: bold; font-size: 12px;">🎁 Gift Received</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">Sokha Spa - $50</div>
+                                    <div style="font-size: 10px; color: #95a5a6;">Oct 27, 3:15 PM</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 12px; color: #27ae60; font-weight: bold;">+$50.00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Detail -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>14:21</span>
+                        <span>🔋 67%</span>
+                    </div>
+                    <div class="screen-title">📄 Transaction Details</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Receipt</div>
+                        <div class="menu-btn"></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="text-align: center; margin: 15px 0;">
+                            <div style="font-size: 48px; margin-bottom: 10px;">✅</div>
+                            <div style="font-size: 16px; font-weight: bold; color: #27ae60;">Redemption Complete</div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px;">
+                                <span style="color: #7f8c8d;">Merchant:</span>
+                                <span style="font-weight: bold;">Brown Coffee</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px;">
+                                <span style="color: #7f8c8d;">Location:</span>
+                                <span style="font-weight: bold;">BKK1 Branch</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px;">
+                                <span style="color: #7f8c8d;">Amount:</span>
+                                <span style="font-weight: bold;">$15.00</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px;">
+                                <span style="color: #7f8c8d;">Date & Time:</span>
+                                <span style="font-weight: bold;">Oct 28, 2025 11:33 AM</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; padding-top: 8px; border-top: 1px solid #e0e0e0;">
+                                <span style="color: #7f8c8d;">Transaction ID:</span>
+                                <span style="font-weight: bold; font-family: monospace; font-size: 10px;">TXN-2025-5678</span>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin: 15px 0; font-size: 11px; color: #856404;">
+                            💡 This transaction has been recorded in your history
+                        </div>
+                        
+                        <button class="button outline">📧 Email Receipt</button>
+                        <button class="button outline">🖨️ Print Receipt</button>
+                        <button class="button">⭐ Rate This Experience</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. SUPPORT & HELP -->
+            <div class="subsection-title">
+                <span class="flow-number">9</span> Support & Help Center
+            </div>
+            <div class="feature-description">
+                <h4>💬 In-App Support & Help Center</h4>
+                <p><span class="priority-badge critical">CRITICAL</span> Comprehensive support system with FAQs, live chat, and ticket management</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Help Center -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>15:00</span>
+                        <span>🔋 65%</span>
+                    </div>
+                    <div class="screen-title">❓ Help Center</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">How can we help?</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <input class="search-bar" placeholder="🔍 Search for help...">
+                        
+                        <div style="font-weight: bold; margin: 15px 0 10px 0; font-size: 13px;">Popular Topics</div>
+                        
+                        <div class="card" style="cursor: pointer;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="font-size: 24px;">📱</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 12px;">How to redeem vouchers?</div>
+                                    <div style="font-size: 10px; color: #7f8c8d;">Step-by-step guide</div>
+                                </div>
+                                <div style="color: #bdc3c7;">›</div>
+                            </div>
+                        </div>
+                        
+                        <div class="card" style="cursor: pointer;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="font-size: 24px;">💳</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 12px;">Payment issues</div>
+                                    <div style="font-size: 10px; color: #7f8c8d;">Troubleshooting payments</div>
+                                </div>
+                                <div style="color: #bdc3c7;">›</div>
+                            </div>
+                        </div>
+                        
+                        <div class="card" style="cursor: pointer;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="font-size: 24px;">🎁</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 12px;">Gifting vouchers</div>
+                                    <div style="font-size: 10px; color: #7f8c8d;">How to send gifts</div>
+                                </div>
+                                <div style="color: #bdc3c7;">›</div>
+                            </div>
+                        </div>
+                        
+                        <div class="card" style="cursor: pointer;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="font-size: 24px;">🔄</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 12px;">Refund policy</div>
+                                    <div style="font-size: 10px; color: #7f8c8d;">Returns and refunds</div>
+                                </div>
+                                <div style="color: #bdc3c7;">›</div>
+                            </div>
+                        </div>
+                        
+                        <button class="button">💬 Chat with Support</button>
+                        <button class="button outline">📧 Submit a Ticket</button>
+                    </div>
+                </div>
+
+                <!-- Live Chat -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>15:05</span>
+                        <span>🔋 64%</span>
+                    </div>
+                    <div class="screen-title">💬 Live Chat Support</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Support Chat</div>
+                        <div class="menu-btn"></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="background: #e8f4f8; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                            <div style="font-size: 11px; font-weight: bold; margin-bottom: 5px;">Support Agent</div>
+                            <div style="font-size: 12px; line-height: 1.5;">
+                                Hi! I'm here to help. How can I assist you today?
+                            </div>
+                            <div style="font-size: 9px; color: #7f8c8d; margin-top: 5px;">15:05</div>
+                        </div>
+                        
+                        <div style="background: #3498db; color: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; margin-left: 40px;">
+                            <div style="font-size: 12px; line-height: 1.5;">
+                                I'm having trouble redeeming my voucher
+                            </div>
+                            <div style="font-size: 9px; opacity: 0.8; margin-top: 5px; text-align: right;">15:06</div>
+                        </div>
+                        
+                        <div style="background: #e8f4f8; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                            <div style="font-size: 11px; font-weight: bold; margin-bottom: 5px;">Support Agent</div>
+                            <div style="font-size: 12px; line-height: 1.5;">
+                                I can help with that. Can you tell me which merchant you're trying to redeem at?
+                            </div>
+                            <div style="font-size: 9px; color: #7f8c8d; margin-top: 5px;">15:06</div>
+                        </div>
+                        
+                        <div style="position: absolute; bottom: 15px; left: 15px; right: 15px;">
+                            <div style="display: flex; gap: 8px;">
+                                <input class="input-field" placeholder="Type your message..." style="margin: 0;">
+                                <button class="button" style="width: 60px; margin: 0; padding: 10px;">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Ticket -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>15:10</span>
+                        <span>🔋 63%</span>
+                    </div>
+                    <div class="screen-title">📧 Submit Support Ticket</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">New Ticket</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 8px;">Issue Category</div>
+                            <select class="input-field" style="margin: 0;">
+                                <option>Select category...</option>
+                                <option>Payment Issue</option>
+                                <option>Redemption Problem</option>
+                                <option>Technical Issue</option>
+                                <option>Account Question</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 8px;">Subject</div>
+                            <input class="input-field" placeholder="Brief description of issue..." style="margin: 0;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 8px;">Description</div>
+                            <textarea class="input-field" rows="4" placeholder="Please provide details about your issue..." style="margin: 0;"></textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 8px;">Attach Screenshot (Optional)</div>
+                            <button class="button outline" style="margin: 0;">📷 Choose File</button>
+                        </div>
+                        
+                        <button class="button">Submit Ticket</button>
+                        <div style="text-align: center; margin-top: 10px; font-size: 11px; color: #7f8c8d;">
+                            We typically respond within 24 hours
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================== -->
+        <!-- MERCHANT APP SECTION -->
+        <!-- =================================================== -->
+        <div class="app-section">
+            <h2 class="section-title">🏪 Merchant App Screens</h2>
+            <p class="section-subtitle">Complete merchant journey from onboarding to analytics</p>
+
+            <!-- 1. MERCHANT AUTHENTICATION -->
+            <div class="subsection-title">
+                <span class="flow-number">1</span> Merchant Authentication
+            </div>
+            <div class="feature-description">
+                <h4>🔐 Sign In & Sign Up</h4>
+                <p>Separate authentication flows for new and returning merchant partners</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Merchant Sign In -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:00</span>
+                        <span>🔋 100%</span>
+                    </div>
+                    <div class="screen-title">🔐 Merchant Sign In</div>
+                    <div class="content-area">
+                        <div style="text-align: center; margin: 30px 0;">
+                            <div style="font-size: 48px; margin-bottom: 10px;">🏪</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #2c3e50;">Kado24 for Merchants</div>
+                            <div style="font-size: 12px; color: #7f8c8d;">Welcome Back!</div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Business Phone Number</div>
+                            <input class="input-field" type="tel" placeholder="+855 12 XXX XXX" style="margin: 0;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Password</div>
+                            <input class="input-field" type="password" placeholder="Enter your password" style="margin: 0;">
+                        </div>
+                        <div style="text-align: right; margin-bottom: 15px;">
+                            <a href="#" style="font-size: 11px; color: #3498db; text-decoration: none;">Forgot Password?</a>
+                        </div>
+                        <button class="button">Sign In</button>
+                        <div style="text-align: center; margin-top: 20px; font-size: 12px;">
+                            <span style="color: #7f8c8d;">New to Kado24? </span>
+                            <a href="#" style="color: #3498db; font-weight: bold; text-decoration: none;">Register Your Business</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Merchant Sign Up -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:02</span>
+                        <span>🔋 99%</span>
+                    </div>
+                    <div class="screen-title">✍️ Merchant Sign Up</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Register Business</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Business Name *</div>
+                            <input class="input-field" type="text" placeholder="e.g. Brown Coffee" style="margin: 0;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Business Phone *</div>
+                            <input class="input-field" type="tel" placeholder="+855 12 XXX XXX" style="margin: 0;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Business Email *</div>
+                            <input class="input-field" type="email" placeholder="business@email.com" style="margin: 0;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Business Category *</div>
+                            <select class="input-field" style="margin: 0;">
+                                <option>Select category...</option>
+                                <option>Food & Beverage</option>
+                                <option>Spa & Wellness</option>
+                                <option>Entertainment</option>
+                                <option>Shopping</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Password *</div>
+                            <input class="input-field" type="password" placeholder="Minimum 8 characters" style="margin: 0;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Confirm Password *</div>
+                            <input class="input-field" type="password" placeholder="Re-enter password" style="margin: 0;">
+                        </div>
+                        <div style="font-size: 11px; color: #7f8c8d; margin-bottom: 15px; line-height: 1.5;">
+                            <input type="checkbox" style="margin-right: 5px;">
+                            I agree to the <a href="#" style="color: #3498db;">Merchant Terms</a> and <a href="#" style="color: #3498db;">Privacy Policy</a>
+                        </div>
+                        <button class="button">Create Merchant Account</button>
+                        <div style="text-align: center; margin-top: 15px; font-size: 12px;">
+                            <span style="color: #7f8c8d;">Already have an account? </span>
+                            <a href="#" style="color: #3498db; font-weight: bold; text-decoration: none;">Sign In</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OTP Verification -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:04</span>
+                        <span>🔋 98%</span>
+                    </div>
+                    <div class="screen-title">📱 Verify Business Phone</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Verification</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="text-align: center; margin: 20px 0; color: #7f8c8d; font-size: 13px;">
+                            Enter the 6-digit code sent to<br>
+                            <strong style="color: #2c3e50;">+855 12 345 678</strong>
+                        </div>
+                        <div style="display: flex; justify-content: center; gap: 8px; margin: 30px 0;">
+                            <input class="input-field" style="width: 40px; text-align: center; font-size: 20px;" maxlength="1" value="1">
+                            <input class="input-field" style="width: 40px; text-align: center; font-size: 20px;" maxlength="1" value="2">
+                            <input class="input-field" style="width: 40px; text-align: center; font-size: 20px;" maxlength="1" value="3">
+                            <input class="input-field" style="width: 40px; text-align: center; font-size: 20px;" maxlength="1" value="4">
+                            <input class="input-field" style="width: 40px; text-align: center; font-size: 20px;" maxlength="1">
+                            <input class="input-field" style="width: 40px; text-align: center; font-size: 20px;" maxlength="1">
+                        </div>
+                        <button class="button">Verify & Continue</button>
+                        <div style="text-align: center; margin-top: 15px; font-size: 12px;">
+                            <span style="color: #7f8c8d;">Didn't receive code?</span>
+                            <span style="color: #3498db; font-weight: bold; cursor: pointer;"> Resend (45s)</span>
+                        </div>
+                        <div style="background: #e8f4f8; padding: 12px; border-radius: 8px; font-size: 11px; color: #2c3e50; margin-top: 20px;">
+                            ℹ️ After verification, you'll complete your business profile for approval
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. MERCHANT DASHBOARD -->
+            <div class="subsection-title">
+                <span class="flow-number">2</span> Dashboard & Overview
+            </div>
+            <div class="feature-description">
+                <h4>📊 Merchant Dashboard</h4>
+                <p>Real-time overview of sales, redemptions, and business performance</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Main Dashboard -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>🔋 100%</span>
+                    </div>
+                    <div class="screen-title">🏪 Dashboard</div>
+                    <div class="header-bar">
+                        <div class="menu-btn"></div>
+                        <div class="page-title">Brown Coffee</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-number">156</div>
+                                <div class="stat-label">Today's Redemptions</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">$1,240</div>
+                                <div class="stat-label">Today's Revenue</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">89</div>
+                                <div class="stat-label">Active Vouchers</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">$245</div>
+                                <div class="stat-label">Commission</div>
+                            </div>
+                        </div>
+                        <button class="button">📱 Scan Customer QR</button>
+                        <button class="button secondary">📊 View Reports</button>
+                        <button class="button outline">🎫 Manage Vouchers</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. VOUCHER MANAGEMENT -->
+            <div class="subsection-title">
+                <span class="flow-number">3</span> Voucher Management
+            </div>
+            <div class="feature-description">
+                <h4>🎫 Create & Manage Vouchers</h4>
+                <p>Tools for creating, editing, and managing voucher offerings</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Manage Vouchers -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:42</span>
+                        <span>🔋 99%</span>
+                    </div>
+                    <div class="screen-title">🎫 Manage Vouchers</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">My Vouchers</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <button class="button">+ Create New Voucher</button>
+                        <div class="voucher-card">
+                            <div class="voucher-title">Coffee Voucher</div>
+                            <div class="voucher-price">$5 - $25</div>
+                            <div style="font-size: 12px; color: #7f8c8d;">89 sold this week</div>
+                        </div>
+                        <div class="voucher-card">
+                            <div class="voucher-title">Breakfast Combo</div>
+                            <div class="voucher-price">$8 - $15</div>
+                            <div style="font-size: 12px; color: #7f8c8d;">45 sold this week</div>
+                        </div>
+                        <div class="qr-placeholder" style="width: 80px; height: 80px; font-size: 10px;">
+                            Store QR<br>Code
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. QR SCANNER & REDEMPTION -->
+            <div class="subsection-title">
+                <span class="flow-number">4</span> QR Scanner & Redemption
+            </div>
+            <div class="feature-description">
+                <h4>📱 Customer QR Scanner</h4>
+                <p>Scan customer QR codes to validate and redeem vouchers</p>
+            </div>
+            <div class="screens-grid">
+                <!-- QR Scanner -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:43</span>
+                        <span>🔋 98%</span>
+                    </div>
+                    <div class="screen-title">📸 Scan Customer QR</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Redeem Voucher</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="flow-indicator">
+                            Customer shows voucher QR
+                        </div>
+                        <div class="scanner-frame"></div>
+                        <div style="text-align: center; margin: 15px 0; font-size: 12px; color: #7f8c8d;">
+                            Point camera at customer's voucher
+                        </div>
+                        <button class="button secondary">💡 Turn on Flash</button>
+                    </div>
+                </div>
+
+                <!-- Voucher Validation -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:44</span>
+                        <span>🔋 97%</span>
+                    </div>
+                    <div class="screen-title">✅ Validate Voucher</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Confirm Redemption</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="flow-indicator">
+                            ✅ Voucher Valid
+                        </div>
+                        <div class="voucher-card">
+                            <div class="voucher-title">Coffee Voucher</div>
+                            <div class="voucher-price">$10.00</div>
+                            <div style="font-size: 12px; color: #27ae60;">Valid • Expires: Dec 31, 2025</div>
+                        </div>
+                        <input class="input-field" placeholder="Order details (optional)">
+                        <button class="button success">✅ Confirm Redemption</button>
+                        <button class="button danger">❌ Reject</button>
+                    </div>
+                </div>
+
+                <!-- Transaction Complete -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:45</span>
+                        <span>🔋 96%</span>
+                    </div>
+                    <div class="screen-title">🎉 Transaction Complete</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Success</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="flow-indicator">
+                            🎉 Redemption Successful
+                        </div>
+                        <div class="voucher-card">
+                            <div class="voucher-title">Coffee Voucher Redeemed</div>
+                            <div class="voucher-price">$10.00</div>
+                            <div style="font-size: 12px; color: #27ae60;">Commission: $1.20</div>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-number">157</div>
+                                <div class="stat-label">Today's Redemptions</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">$1,250</div>
+                                <div class="stat-label">Today's Revenue</div>
+                            </div>
+                        </div>
+                        <button class="button">📱 Scan Another QR</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. REPORTS & ANALYTICS -->
+            <div class="subsection-title">
+                <span class="flow-number">5</span> Reports & Analytics
+            </div>
+            <div class="feature-description">
+                <h4>📊 Sales Analytics</h4>
+                <p>Detailed reports and insights on sales performance</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Analytics Dashboard -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>14:30</span>
+                        <span>🔋 82%</span>
+                    </div>
+                    <div class="screen-title">📊 Analytics</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Sales Report</div>
+                        <div class="menu-btn"></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="display: flex; gap: 8px; margin-bottom: 15px; font-size: 11px;">
+                            <button class="button" style="flex: 1; padding: 6px; margin: 0;">Today</button>
+                            <button class="button outline" style="flex: 1; padding: 6px; margin: 0;">Week</button>
+                            <button class="button outline" style="flex: 1; padding: 6px; margin: 0;">Month</button>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-number">$23,145</div>
+                                <div class="stat-label">Total Revenue</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">1,892</div>
+                                <div class="stat-label">Redemptions</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">$12.24</div>
+                                <div class="stat-label">Avg. Voucher</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">$2,261</div>
+                                <div class="stat-label">Commission</div>
+                            </div>
+                        </div>
+                        <button class="button secondary" style="margin-top: 10px;">📥 Export Report</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. DISPUTE MANAGEMENT -->
+            <div class="subsection-title">
+                <span class="flow-number">6</span> Dispute Management
+            </div>
+            <div class="feature-description">
+                <h4>⚖️ Dispute Resolution</h4>
+                <p><span class="priority-badge high">HIGH</span> Handle customer disputes and complaints with evidence submission</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Disputes List -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>10:30</span>
+                        <span>🔋 88%</span>
+                    </div>
+                    <div class="screen-title">⚖️ Disputes</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Active Disputes</div>
+                        <div class="menu-btn"></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="display: flex; gap: 8px; margin-bottom: 15px; font-size: 11px;">
+                            <button class="button" style="flex: 1; padding: 6px; margin: 0;">Active (2)</button>
+                            <button class="button outline" style="flex: 1; padding: 6px; margin: 0;">Resolved (8)</button>
+                        </div>
+                        
+                        <div class="card" style="border-left: 4px solid #f39c12;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div style="font-weight: bold; font-size: 12px;">Dispute #D-2025-042</div>
+                                <span style="background: #fff3cd; padding: 2px 8px; border-radius: 4px; font-size: 10px;">Pending</span>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.5;">
+                                Customer claims voucher not accepted<br>
+                                <strong>Voucher:</strong> $15 Coffee Voucher<br>
+                                <strong>Filed:</strong> Oct 25, 2025
+                            </div>
+                            <button class="button outline" style="margin-top: 10px; padding: 6px;">View Details</button>
+                        </div>
+                        
+                        <div class="card" style="border-left: 4px solid #e74c3c;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div style="font-weight: bold; font-size: 12px;">Dispute #D-2025-038</div>
+                                <span style="background: #f8d7da; padding: 2px 8px; border-radius: 4px; font-size: 10px;">Urgent</span>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.5;">
+                                Quality complaint - expired product<br>
+                                <strong>Voucher:</strong> $50 Breakfast Combo<br>
+                                <strong>Filed:</strong> Oct 27, 2025
+                            </div>
+                            <button class="button outline" style="margin-top: 10px; padding: 6px;">Respond Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dispute Detail -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>10:32</span>
+                        <span>🔋 87%</span>
+                    </div>
+                    <div class="screen-title">📋 Dispute Details</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Dispute #D-2025-042</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="card" style="background: #fff3cd; border-color: #f39c12;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 8px;">Customer Complaint</div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.5;">
+                                "I tried to use my $15 coffee voucher at your BKK1 location but the staff said they don't accept vouchers from this app."
+                            </div>
+                        </div>
+                        
+                        <div style="margin: 15px 0;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 8px;">Dispute Information</div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.8;">
+                                <strong>Date Filed:</strong> Oct 25, 2025<br>
+                                <strong>Voucher:</strong> $15 Coffee Voucher<br>
+                                <strong>Customer:</strong> +855 12 XXX XXX<br>
+                                <strong>Status:</strong> Awaiting merchant response
+                            </div>
+                        </div>
+                        
+                        <div style="margin: 15px 0;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 8px;">Your Response</div>
+                            <textarea class="input-field" rows="3" placeholder="Explain your side of the story..."></textarea>
+                        </div>
+                        
+                        <button class="button outline">📎 Attach Evidence</button>
+                        <button class="button">Submit Response</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. OFFLINE MODE -->
+            <div class="subsection-title">
+                <span class="flow-number">7</span> Offline Mode
+            </div>
+            <div class="feature-description">
+                <h4>📶 Offline Support</h4>
+                <p>Continue processing redemptions without internet connection with auto-sync</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Offline Mode -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:46</span>
+                        <span>📶 No Signal</span>
+                    </div>
+                    <div class="screen-title">📶 Offline Mode</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">No Connection</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="flow-indicator" style="background: #f39c12;">
+                            ⚠️ No Internet Connection
+                        </div>
+                        <div style="text-align: center; margin: 20px 0; font-size: 14px; color: #e74c3c;">
+                            📱<br>
+                            Offline Redemption Mode
+                        </div>
+                        <div style="text-align: center; margin: 15px 0; font-size: 12px; color: #7f8c8d;">
+                            Transactions will sync when connection returns
+                        </div>
+                        <button class="button secondary">📱 Continue Offline</button>
+                        <button class="button">🔄 Retry Connection</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================== -->
+        <!-- ADMIN DASHBOARD SECTION -->
+        <!-- =================================================== -->
+        <div class="app-section">
+            <h2 class="section-title">⚙️ Admin Web Portal</h2>
+            <p class="section-subtitle">Platform management and oversight tools</p>
+
+            <!-- 1. ADMIN AUTHENTICATION -->
+            <div class="subsection-title">
+                <span class="flow-number">1</span> Admin Authentication
+            </div>
+            <div class="feature-description">
+                <h4>🔐 Admin Sign In</h4>
+                <p>Secure authentication for platform administrators (no public registration)</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Admin Sign In -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>11:40</span>
+                        <span>🔋 55%</span>
+                    </div>
+                    <div class="screen-title">🔐 Admin Sign In</div>
+                    <div class="content-area">
+                        <div style="text-align: center; margin: 40px 0;">
+                            <div style="font-size: 48px; margin-bottom: 10px;">⚙️</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #2c3e50;">Kado24 Admin</div>
+                            <div style="font-size: 12px; color: #7f8c8d;">Platform Management Portal</div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Admin Email</div>
+                            <input class="input-field" type="email" placeholder="admin@kado24.com" style="margin: 0;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Password</div>
+                            <input class="input-field" type="password" placeholder="Enter your password" style="margin: 0;">
+                        </div>
+                        <div style="text-align: right; margin-bottom: 15px;">
+                            <a href="#" style="font-size: 11px; color: #3498db; text-decoration: none;">Forgot Password?</a>
+                        </div>
+                        <button class="button">Sign In to Admin Panel</button>
+                        <div style="background: #fff3cd; padding: 12px; border-radius: 8px; font-size: 11px; color: #856404; margin-top: 20px; text-align: center;">
+                            🔒 Admin accounts are created by system administrators only
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. PLATFORM OVERVIEW -->
+            <div class="subsection-title">
+                <span class="flow-number">2</span> Platform Overview
+            </div>
+            <div class="feature-description">
+                <h4>📊 Platform Analytics Dashboard</h4>
+                <p><span class="priority-badge critical">CRITICAL</span> Real-time metrics, KPIs, and platform health monitoring</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Admin Dashboard -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>11:45</span>
+                        <span>🔋 55%</span>
+                    </div>
+                    <div class="screen-title">⚙️ Admin Dashboard</div>
+                    <div class="header-bar">
+                        <div class="menu-btn"></div>
+                        <div class="page-title">Platform Overview</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <div style="font-size: 11px; margin-bottom: 5px; opacity: 0.9;">Platform GMV (30d)</div>
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 8px;">$284,250</div>
+                            <div style="font-size: 11px; opacity: 0.9;">
+                                ▲ 23% vs last period • 8,542 transactions
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="metric-card">
+                                <div class="metric-value">245</div>
+                                <div class="metric-label">Active Merchants</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">12.8K</div>
+                                <div class="metric-label">Active Users</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">$22.7K</div>
+                                <div class="metric-label">Platform Revenue</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">97.2%</div>
+                                <div class="metric-label">Success Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. MERCHANT APPROVAL -->
+            <div class="subsection-title">
+                <span class="flow-number">3</span> Merchant Approval Workflow
+            </div>
+            <div class="feature-description">
+                <h4>✅ Merchant Application Review</h4>
+                <p><span class="priority-badge critical">CRITICAL</span> Review and approve/reject merchant applications with document verification</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Pending Approvals -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>11:50</span>
+                        <span>🔋 53%</span>
+                    </div>
+                    <div class="screen-title">📋 Pending Approvals</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Merchant Applications</div>
+                        <div class="menu-btn"></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="display: flex; gap: 8px; margin-bottom: 15px; font-size: 11px;">
+                            <button class="button" style="flex: 1; padding: 6px; margin: 0;">Pending (8)</button>
+                            <button class="button outline" style="flex: 1; padding: 6px; margin: 0;">Approved</button>
+                            <button class="button outline" style="flex: 1; padding: 6px; margin: 0;">Rejected</button>
+                        </div>
+                        
+                        <div class="card" style="border-left: 4px solid #f39c12;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div style="font-weight: bold; font-size: 12px;">Amazon Coffee</div>
+                                <span style="background: #fff3cd; padding: 2px 8px; border-radius: 4px; font-size: 10px;">New</span>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.5;">
+                                Category: Food & Beverage<br>
+                                Location: BKK3, Phnom Penh<br>
+                                Applied: 2 hours ago
+                            </div>
+                            <button class="button outline" style="margin-top: 10px; padding: 6px;">Review Application</button>
+                        </div>
+                        
+                        <div class="card" style="border-left: 4px solid #3498db;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div style="font-weight: bold; font-size: 12px;">Lotus Spa & Wellness</div>
+                                <span style="background: #e8f4f8; padding: 2px 8px; border-radius: 4px; font-size: 10px;">In Review</span>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.5;">
+                                Category: Spa & Wellness<br>
+                                Location: Riverside, Phnom Penh<br>
+                                Applied: Yesterday
+                            </div>
+                            <button class="button outline" style="margin-top: 10px; padding: 6px;">Continue Review</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application Review -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>11:52</span>
+                        <span>🔋 52%</span>
+                    </div>
+                    <div class="screen-title">🔍 Review Application</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Amazon Coffee</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="card">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">Business Information</div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.8;">
+                                <strong>Name:</strong> Amazon Coffee<br>
+                                <strong>Category:</strong> Food & Beverage<br>
+                                <strong>Phone:</strong> +855 12 345 678<br>
+                                <strong>Location:</strong> St 155, BKK3, PP
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">Documents</div>
+                            <div style="font-size: 11px; color: #27ae60; margin-bottom: 5px;">✓ Business Registration</div>
+                            <div style="font-size: 11px; color: #27ae60; margin-bottom: 5px;">✓ Tax ID Certificate</div>
+                            <div style="font-size: 11px; color: #27ae60;">✓ Owner ID Card</div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">Bank Details</div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.8;">
+                                <strong>Bank:</strong> ABA Bank<br>
+                                <strong>Account:</strong> ****5678
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 15px;">
+                            <textarea class="input-field" rows="2" placeholder="Add notes (optional)..." style="margin: 0 0 10px 0;"></textarea>
+                            <button class="button success">✅ Approve Merchant</button>
+                            <button class="button danger">❌ Reject Application</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. FRAUD DETECTION -->
+            <div class="subsection-title">
+                <span class="flow-number">4</span> Fraud Detection System
+            </div>
+            <div class="feature-description">
+                <h4>🛡️ Fraud Monitoring & Prevention</h4>
+                <p><span class="priority-badge critical">CRITICAL</span> Real-time fraud detection, suspicious activity alerts, and investigation tools</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Fraud Alerts -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>11:55</span>
+                        <span>🔋 50%</span>
+                    </div>
+                    <div class="screen-title">🛡️ Fraud Detection</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Security Alerts</div>
+                        <div class="menu-btn"></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+                            <div style="font-weight: bold; font-size: 12px; color: #721c24; margin-bottom: 5px;">⚠️ High Risk Alerts: 3</div>
+                            <div style="font-size: 11px; color: #721c24;">Requires immediate attention</div>
+                        </div>
+                        
+                        <div class="card" style="border-left: 4px solid #e74c3c;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div style="font-weight: bold; font-size: 12px;">Multiple Failed Redemptions</div>
+                                <span style="background: #f8d7da; padding: 2px 8px; border-radius: 4px; font-size: 10px; color: #721c24;">High Risk</span>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.5;">
+                                User +855 XX XXX XXX attempted 15 redemptions in 10 minutes<br>
+                                <strong>Time:</strong> Today, 11:42 AM
+                            </div>
+                            <button class="button danger" style="margin-top: 10px; padding: 6px;">Investigate Now</button>
+                        </div>
+                        
+                        <div class="card" style="border-left: 4px solid #f39c12;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div style="font-weight: bold; font-size: 12px;">Duplicate Transaction Pattern</div>
+                                <span style="background: #fff3cd; padding: 2px 8px; border-radius: 4px; font-size: 10px;">Medium Risk</span>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.5;">
+                                Same voucher redeemed 3 times in different locations<br>
+                                <strong>Voucher:</strong> KC-2025-7834
+                            </div>
+                            <button class="button outline" style="margin-top: 10px; padding: 6px;">Review Details</button>
+                        </div>
+                        
+                        <div class="card" style="border-left: 4px solid #3498db;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div style="font-weight: bold; font-size: 12px;">Unusual Purchase Volume</div>
+                                <span style="background: #e8f4f8; padding: 2px 8px; border-radius: 4px; font-size: 10px;">Low Risk</span>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.5;">
+                                New user purchased $500 in vouchers<br>
+                                <strong>User ID:</strong> USR-12345
+                            </div>
+                            <button class="button outline" style="margin-top: 10px; padding: 6px;">Monitor</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fraud Investigation -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>11:58</span>
+                        <span>🔋 49%</span>
+                    </div>
+                    <div class="screen-title">🔍 Fraud Investigation</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Case Details</div>
+                        <div></div>
+                    </div>
+                    <div class="content-area">
+                        <div class="card" style="background: #f8d7da; border-color: #e74c3c;">
+                            <div style="font-weight: bold; font-size: 12px; margin-bottom: 8px; color: #721c24;">⚠️ High Risk Alert</div>
+                            <div style="font-size: 11px; color: #721c24; line-height: 1.5;">
+                                Multiple failed redemption attempts detected
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">User Activity</div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.8;">
+                                <strong>User:</strong> +855 XX XXX XXX<br>
+                                <strong>Device:</strong> iPhone 12 Pro<br>
+                                <strong>Location:</strong> Phnom Penh<br>
+                                <strong>Account Age:</strong> 2 days
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">Suspicious Pattern</div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.5;">
+                                • 15 redemption attempts in 10 minutes<br>
+                                • 5 different merchants<br>
+                                • All attempts failed validation<br>
+                                • Possible voucher fraud attempt
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">Recommended Action</div>
+                            <div style="font-size: 11px; color: #7f8c8d; line-height: 1.5;">
+                                Suspend account and investigate further
+                            </div>
+                        </div>
+                        
+                        <button class="button danger">🚫 Suspend Account</button>
+                        <button class="button outline">📧 Contact User</button>
+                        <button class="button secondary">⚠️ Flag for Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. USER MANAGEMENT -->
+            <div class="subsection-title">
+                <span class="flow-number">5</span> User Management
+            </div>
+            <div class="feature-description">
+                <h4>👥 User & Account Management</h4>
+                <p>Manage consumer and merchant accounts, handle support tickets, and user disputes</p>
+            </div>
+            <div class="screens-grid">
+                <!-- User List -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>12:00</span>
+                        <span>🔋 48%</span>
+                    </div>
+                    <div class="screen-title">👥 User Management</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">All Users</div>
+                        <div class="menu-btn"></div>
+                    </div>
+                    <div class="content-area">
+                        <input class="search-bar" placeholder="🔍 Search users...">
+                        
+                        <div style="display: flex; gap: 8px; margin-bottom: 15px; font-size: 11px;">
+                            <button class="button" style="flex: 1; padding: 6px; margin: 0;">All</button>
+                            <button class="button outline" style="flex: 1; padding: 6px; margin: 0;">Active</button>
+                            <button class="button outline" style="flex: 1; padding: 6px; margin: 0;">Suspended</button>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: bold; font-size: 12px;">+855 12 345 678</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">Active • Joined: Oct 15, 2025</div>
+                                </div>
+                                <button class="button outline" style="padding: 4px 12px; margin: 0; font-size: 10px;">View</button>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: bold; font-size: 12px;">+855 98 765 432</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">Active • Joined: Sep 28, 2025</div>
+                                </div>
+                                <button class="button outline" style="padding: 4px 12px; margin: 0; font-size: 10px;">View</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. TRANSACTION MONITORING -->
+            <div class="subsection-title">
+                <span class="flow-number">6</span> Transaction Monitoring
+            </div>
+            <div class="feature-description">
+                <h4>💳 Real-time Transaction Tracking</h4>
+                <p>Monitor all platform transactions with filtering and detailed logs</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Transaction Monitor -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>11:45</span>
+                        <span>🔋 55%</span>
+                    </div>
+                    <div class="screen-title">💳 Transactions</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Real-time Monitor</div>
+                        <div class="menu-btn"></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; margin-bottom: 12px; text-align: center;">
+                            <div style="font-size: 11px; color: #155724; margin-bottom: 3px;">Live Transactions (Last 5 min)</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #27ae60;">$1,248</div>
+                            <div style="font-size: 10px; color: #155724;">42 transactions</div>
+                        </div>
+                        
+                        <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">Recent Transactions</div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 11px;">Purchase - Brown Coffee</div>
+                                    <div style="font-size: 10px; color: #7f8c8d;">+855 XX XXX • 2 min ago</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold; font-size: 12px; color: #27ae60;">$15.00</div>
+                                    <div style="font-size: 9px; color: #27ae60;">✓ Success</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 11px;">Redemption - Sokha Spa</div>
+                                    <div style="font-size: 10px; color: #7f8c8d;">+855 YY YYY • 3 min ago</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold; font-size: 12px; color: #3498db;">$50.00</div>
+                                    <div style="font-size: 9px; color: #27ae60;">✓ Success</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. MERCHANT PERFORMANCE -->
+            <div class="subsection-title">
+                <span class="flow-number">7</span> Merchant Performance Leaderboard
+            </div>
+            <div class="feature-description">
+                <h4>🏆 Top Performing Merchants</h4>
+                <p>Track merchant performance metrics and identify growth opportunities</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Merchant Leaderboard -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>11:56</span>
+                        <span>🔋 51%</span>
+                    </div>
+                    <div class="screen-title">🏆 Merchant Leaderboard</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Top Performers</div>
+                        <div class="menu-btn"></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="display: flex; gap: 8px; margin-bottom: 15px; font-size: 11px;">
+                            <button class="button" style="flex: 1; padding: 6px; margin: 0;">Revenue</button>
+                            <button class="button outline" style="flex: 1; padding: 6px; margin: 0;">Sales</button>
+                            <button class="button outline" style="flex: 1; padding: 6px; margin: 0;">Growth</button>
+                        </div>
+                        
+                        <!-- Top 3 -->
+                        <div class="card" style="background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border-color: #ffd700;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: bold; font-size: 13px;">🥇 1. Brown Coffee</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">$28.4K • 1,234 sales</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold;">$28.4K</div>
+                                    <div style="font-size: 10px; color: #7f8c8d;">890 sales</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d;">
+                                Category: Cafe • Commission: $2.27K • Growth: +35%
+                            </div>
+                        </div>
+                        
+                        <div class="card" style="background: #e8e8e8; border-color: #c0c0c0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: bold; font-size: 12px;">🥈 2. Sokha Hotel Spa</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">$18.9K • 678 sales</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold;">$18.9K</div>
+                                    <div style="font-size: 10px; color: #7f8c8d;">678 sales</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d;">
+                                Category: Spa • Commission: $1.51K • Growth: +28%
+                            </div>
+                        </div>
+                        
+                        <div class="card" style="background: #ffd7b5; border-color: #cd7f32;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: bold; font-size: 12px;">🥉 3. Costa Coffee</div>
+                                    <div style="font-size: 11px; color: #7f8c8d;">$12.8K • 542 sales</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold;">$12.8K</div>
+                                    <div style="font-size: 10px; color: #7f8c8d;">542 sales</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 11px; color: #7f8c8d;">
+                                Category: Cafe • Commission: $1.02K • Growth: +18%
+                            </div>
+                        </div>
+                        
+                        <button class="button outline">View Full Leaderboard (245)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. FINANCIAL OVERVIEW -->
+            <div class="subsection-title">
+                <span class="flow-number">8</span> Financial Overview
+            </div>
+            <div class="feature-description">
+                <h4>💰 Revenue & Payout Management</h4>
+                <p>Track platform revenue, manage merchant payouts, and financial reporting</p>
+            </div>
+            <div class="screens-grid">
+                <!-- Financial Dashboard -->
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>11:58</span>
+                        <span>🔋 49%</span>
+                    </div>
+                    <div class="screen-title">💰 Financial Overview</div>
+                    <div class="header-bar">
+                        <div class="back-btn"></div>
+                        <div class="page-title">Revenue & Payouts</div>
+                        <div class="menu-btn"></div>
+                    </div>
+                    <div class="content-area">
+                        <div style="background: #27ae60; color: white; padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+                            <div style="font-size: 12px; margin-bottom: 5px; opacity: 0.9;">Platform Revenue (30d)</div>
+                            <div style="font-size: 36px; font-weight: bold; margin-bottom: 10px;">$22.7K</div>
+                            <div style="font-size: 11px; opacity: 0.9;">
+                                8% commission • ▲ 23% vs last period
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                            <div class="metric-card">
+                                <div class="metric-value">$284K</div>
+                                <div class="metric-label">Total GMV</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">$261K</div>
+                                <div class="metric-label">Merchant Payouts</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <div style="font-weight: bold; margin-bottom: 10px;">Pending Payouts</div>
+                            <div class="voucher-card" style="background: #fff3cd; border-color: #f39c12;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <div style="font-weight: bold; font-size: 12px;">Weekly Payout #WP245</div>
+                                        <div style="font-size: 11px; color: #7f8c8d;">Due: Oct 31, 2025</div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-weight: bold; font-size: 14px;">$45.2K</div>
+                                        <div style="font-size: 10px; color: #7f8c8d;">158 merchants</div>
+                                    </div>
+                                </div>
+                                <button class="button" style="margin-top: 10px; padding: 8px; font-size: 11px;">Process Payout</button>
+                            </div>
+                        </div>
+                        
+                        <button class="button outline">View Full Financial Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUMMARY SECTION -->
+        <div class="app-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <h2 style="color: white; margin-bottom: 20px; text-align: center;">🎯 Wireframe Summary</h2>
+            
+            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <h3 style="color: white; margin-bottom: 15px;">📊 Screen Count by Role</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📱</div>
+                        <div style="font-size: 32px; font-weight: bold; margin-bottom: 5px;">30+</div>
+                        <div style="font-size: 14px;">Consumer Screens</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">🏪</div>
+                        <div style="font-size: 32px; font-weight: bold; margin-bottom: 5px;">20+</div>
+                        <div style="font-size: 14px;">Merchant Screens</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">⚙️</div>
+                        <div style="font-size: 32px; font-weight: bold; margin-bottom: 5px;">15+</div>
+                        <div style="font-size: 14px;">Admin Screens</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <h3 style="color: white; margin-bottom: 15px;">✅ Complete Feature Set</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; font-size: 14px;">
+                    <div>
+                        <h4 style="color: #ffd700; margin-bottom: 10px;">Consumer Features</h4>
+                        <ul style="line-height: 2;">
+                            <li>🔐 Onboarding & Auth</li>
+                            <li>🔍 Search & Discovery</li>
+                            <li>⭐ Ratings & Reviews</li>
+                            <li>💳 Payment Integration</li>
+                            <li>🎁 Wallet & Gifting</li>
+                            <li>📱 QR Redemption</li>
+                            <li>📜 Transaction History</li>
+                            <li>💬 Support & Help</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: #ffd700; margin-bottom: 10px;">Merchant Features</h4>
+                        <ul style="line-height: 2;">
+                            <li>🎯 Onboarding Wizard</li>
+                            <li>📊 Dashboard & Analytics</li>
+                            <li>🎫 Voucher Management</li>
+                            <li>📸 QR Scanner</li>
+                            <li>⚖️ Dispute Resolution</li>
+                            <li>📊 Reports</li>
+                            <li>📶 Offline Mode</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: #ffd700; margin-bottom: 10px;">Admin Features</h4>
+                        <ul style="line-height: 2;">
+                            <li>📊 Platform Analytics</li>
+                            <li>✅ Merchant Approval</li>
+                            <li>🛡️ Fraud Detection</li>
+                            <li>👥 User Management</li>
+                            <li>💳 Transaction Monitoring</li>
+                            <li>🏆 Performance Tracking</li>
+                            <li>💰 Financial Management</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
