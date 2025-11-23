@@ -59,3 +59,22 @@ public interface MerchantMapper {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -441,3 +441,22 @@ docker exec kado24-kafka kafka-topics --bootstrap-server localhost:9092 \
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

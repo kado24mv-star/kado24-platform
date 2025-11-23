@@ -16,6 +16,9 @@ import com.kado24.voucher.entity.VoucherCategory;
 import com.kado24.voucher.mapper.VoucherMapper;
 import com.kado24.voucher.repository.VoucherCategoryRepository;
 import com.kado24.voucher.repository.VoucherRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -39,6 +42,9 @@ public class VoucherService {
     private final VoucherCategoryRepository categoryRepository;
     private final VoucherMapper voucherMapper;
     private final EventPublisher eventPublisher;
+    
+    @PersistenceContext
+    private EntityManager entityManager;
 
     /**
      * Create voucher (merchant only)
@@ -59,15 +65,25 @@ public class VoucherService {
         if (denominations != null && denominations.isEmpty()) {
             denominations = null;
         }
-        List<String> additionalImages = request.getAdditionalImages();
-        if (additionalImages != null && additionalImages.isEmpty()) {
-            additionalImages = null;
-        }
         List<String> redemptionLocations = request.getRedemptionLocations();
         if (redemptionLocations != null && redemptionLocations.isEmpty()) {
             redemptionLocations = null;
         }
         
+        // Calculate minValue and maxValue from denominations (required by database)
+        BigDecimal minValue = BigDecimal.ZERO;
+        BigDecimal maxValue = BigDecimal.ZERO;
+        if (denominations != null && !denominations.isEmpty()) {
+            minValue = denominations.stream()
+                    .min(BigDecimal::compareTo)
+                    .orElse(BigDecimal.ZERO);
+            maxValue = denominations.stream()
+                    .max(BigDecimal::compareTo)
+                    .orElse(BigDecimal.ZERO);
+        }
+        // If no denominations, both are zero (should not happen due to validation)
+        
+        // Build voucher - don't set createdAt/updatedAt, let @CreationTimestamp/@UpdateTimestamp handle it
         Voucher voucher = Voucher.builder()
                 .merchantId(merchantId)
                 .categoryId(request.getCategoryId())
@@ -76,9 +92,11 @@ public class VoucherService {
                 .description(request.getDescription())
                 .termsAndConditions(request.getTermsAndConditions())
                 .denominations(denominations)
+                .minValue(minValue)
+                .maxValue(maxValue)
                 .discountPercentage(request.getDiscountPercentage())
                 .imageUrl(request.getImageUrl())
-                .additionalImages(additionalImages)
+                .additionalImages(null) // Not used - one image per voucher only
                 .status(Voucher.VoucherStatus.DRAFT)
                 .stockQuantity(request.getStockQuantity())
                 .unlimitedStock(request.getUnlimitedStock() != null ? request.getUnlimitedStock() : false)
@@ -88,13 +106,16 @@ public class VoucherService {
                 .minPurchaseAmount(request.getMinPurchaseAmount())
                 .maxPurchasePerUser(request.getMaxPurchasePerUser())
                 .usageInstructions(request.getUsageInstructions())
+                // Explicitly set timestamps to ensure they're not null
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
 
         voucher = voucherRepository.save(voucher);
 
         log.info("Voucher created with ID: {}", voucher.getId());
 
-        return voucherMapper.toDTO(voucher);
+        return enrichVoucherDTO(voucherMapper.toDTO(voucher));
     }
 
     /**
@@ -103,7 +124,7 @@ public class VoucherService {
     public Page<VoucherDTO> getActiveVouchers(Pageable pageable) {
         log.debug("Fetching active vouchers");
         Page<Voucher> vouchers = voucherRepository.findActiveVouchers(pageable);
-        return vouchers.map(voucherMapper::toDTO);
+        return vouchers.map(v -> enrichVoucherDTO(voucherMapper.toDTO(v)));
     }
 
     /**
@@ -136,7 +157,7 @@ public class VoucherService {
         // Publish analytics event
         publishVoucherViewedEvent(voucher.getId());
 
-        return voucherMapper.toDTO(voucher);
+        return enrichVoucherDTO(voucherMapper.toDTO(voucher));
     }
 
     /**
@@ -145,7 +166,7 @@ public class VoucherService {
     public Page<VoucherDTO> searchVouchers(String query, Pageable pageable) {
         log.debug("Searching vouchers with query: {}", query);
         Page<Voucher> vouchers = voucherRepository.searchVouchers(query, pageable);
-        return vouchers.map(voucherMapper::toDTO);
+        return vouchers.map(v -> enrichVoucherDTO(voucherMapper.toDTO(v)));
     }
 
     /**
@@ -159,16 +180,39 @@ public class VoucherService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category", categoryId));
         
         Page<Voucher> vouchers = voucherRepository.findActiveVouchersByCategory(categoryId, pageable);
-        return vouchers.map(voucherMapper::toDTO);
+        return vouchers.map(v -> enrichVoucherDTO(voucherMapper.toDTO(v)));
     }
 
     /**
      * Get merchant's vouchers
      */
+    /**
+     * Get merchant ID from user ID
+     */
+    public Long getMerchantIdByUserId(Long userId) {
+        try {
+            String sql = "SELECT id FROM merchant_schema.merchants WHERE user_id = :userId";
+            Object result = entityManager.createNativeQuery(sql)
+                    .setParameter("userId", userId)
+                    .getSingleResult();
+            
+            if (result instanceof Number) {
+                return ((Number) result).longValue();
+            }
+            return null;
+        } catch (NoResultException e) {
+            log.warn("No merchant found for user ID: {}", userId);
+            return null;
+        } catch (Exception e) {
+            log.error("Error getting merchant ID for user ID: {}", userId, e);
+            return null;
+        }
+    }
+
     public Page<VoucherDTO> getMerchantVouchers(Long merchantId, Pageable pageable) {
         log.debug("Fetching vouchers for merchant: {}", merchantId);
         Page<Voucher> vouchers = voucherRepository.findByMerchantId(merchantId, pageable);
-        return vouchers.map(voucherMapper::toDTO);
+        return vouchers.map(v -> enrichVoucherDTO(voucherMapper.toDTO(v)));
     }
 
     /**
@@ -223,7 +267,7 @@ public class VoucherService {
 
         log.info("Voucher updated: {}", voucherId);
 
-        return voucherMapper.toDTO(voucher);
+        return enrichVoucherDTO(voucherMapper.toDTO(voucher));
     }
 
     /**
@@ -252,7 +296,38 @@ public class VoucherService {
 
         log.info("Voucher published: {}", voucherId);
 
-        return voucherMapper.toDTO(voucher);
+        return enrichVoucherDTO(voucherMapper.toDTO(voucher));
+    }
+
+    /**
+     * Toggle pause status of voucher
+     */
+    @Transactional
+    public VoucherDTO togglePauseVoucher(Long voucherId, Long merchantId) {
+        log.info("Toggling pause status for voucher: {}", voucherId);
+
+        Voucher voucher = voucherRepository.findById(voucherId)
+                .orElseThrow(() -> new ResourceNotFoundException("Voucher", voucherId));
+
+        // Verify ownership
+        if (!voucher.getMerchantId().equals(merchantId)) {
+            throw new ForbiddenException("You don't own this voucher");
+        }
+
+        // Toggle between ACTIVE and PAUSED
+        if (voucher.getStatus() == Voucher.VoucherStatus.ACTIVE) {
+            voucher.setStatus(Voucher.VoucherStatus.PAUSED);
+            log.info("Voucher paused: {}", voucherId);
+        } else if (voucher.getStatus() == Voucher.VoucherStatus.PAUSED) {
+            voucher.setStatus(Voucher.VoucherStatus.ACTIVE);
+            log.info("Voucher unpaused (activated): {}", voucherId);
+        } else {
+            throw new BusinessException("Can only pause/unpause ACTIVE or PAUSED vouchers");
+        }
+
+        voucher = voucherRepository.save(voucher);
+
+        return enrichVoucherDTO(voucherMapper.toDTO(voucher));
     }
 
     /**
@@ -331,6 +406,69 @@ public class VoucherService {
                 .remainingStock(Boolean.TRUE.equals(voucher.getUnlimitedStock()) ? null : voucher.getStockQuantity())
                 .unlimitedStock(voucher.getUnlimitedStock())
                 .build();
+    }
+
+    /**
+     * Enrich VoucherDTO with merchant name and category name
+     */
+    private VoucherDTO enrichVoucherDTO(VoucherDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        // Fetch merchant name from merchant_schema
+        // Handle both cases: merchant_id could be merchant.id or merchant.user_id
+        if (dto.getMerchantId() != null && (dto.getMerchantName() == null || dto.getMerchantName().isEmpty())) {
+            try {
+                log.debug("Enriching voucher DTO with merchant name for merchantId: {}", dto.getMerchantId());
+                // First try to find by merchant.id
+                String merchantName = null;
+                try {
+                    merchantName = (String) entityManager.createNativeQuery(
+                        "SELECT business_name FROM merchant_schema.merchants WHERE id = :merchantId"
+                    )
+                    .setParameter("merchantId", dto.getMerchantId())
+                    .getSingleResult();
+                } catch (NoResultException e) {
+                    // If not found by id, try to find by user_id (in case merchant_id is actually user_id)
+                    log.debug("Merchant not found by id, trying user_id: {}", dto.getMerchantId());
+                    try {
+                        merchantName = (String) entityManager.createNativeQuery(
+                            "SELECT business_name FROM merchant_schema.merchants WHERE user_id = :userId"
+                        )
+                        .setParameter("userId", dto.getMerchantId())
+                        .getSingleResult();
+                    } catch (NoResultException e2) {
+                        log.warn("No merchant found for merchantId/userId: {}", dto.getMerchantId());
+                    }
+                }
+                
+                if (merchantName != null && !merchantName.isEmpty()) {
+                    dto.setMerchantName(merchantName);
+                    log.debug("Successfully enriched merchant name: {}", merchantName);
+                } else {
+                    log.warn("Merchant name is null or empty for merchantId: {}", dto.getMerchantId());
+                    dto.setMerchantName("Unknown Merchant");
+                }
+            } catch (Exception e) {
+                log.warn("Failed to fetch merchant name for merchantId: {}, error: {}", dto.getMerchantId(), e.getMessage());
+                dto.setMerchantName("Unknown Merchant");
+            }
+        }
+
+        // Fetch category name if not already set
+        if (dto.getCategoryId() != null && dto.getCategoryName() == null) {
+            try {
+                VoucherCategory category = categoryRepository.findById(dto.getCategoryId()).orElse(null);
+                if (category != null) {
+                    dto.setCategoryName(category.getDisplayName());
+                }
+            } catch (Exception e) {
+                log.warn("Failed to fetch category name for categoryId: {}, error: {}", dto.getCategoryId(), e.getMessage());
+            }
+        }
+
+        return dto;
     }
 }
 

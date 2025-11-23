@@ -17,6 +17,10 @@ import { Router } from '@angular/router';
           <mat-icon>store</mat-icon>
           Merchants
         </button>
+        <button mat-button routerLink="/users/pending">
+          <mat-icon>person</mat-icon>
+          Users
+        </button>
         <button mat-button routerLink="/transactions">
           <mat-icon>receipt</mat-icon>
           Transactions
@@ -66,6 +70,15 @@ export class AppComponent {
     this.authService.logout();
   }
 }
+
+
+
+
+
+
+
+
+
 
 
 

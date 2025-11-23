@@ -53,6 +53,12 @@ public class UserController {
         
         Long userId = (Long) request.getAttribute("userId");
         
+        if (userId == null) {
+            log.error("userId is null in request attributes - JWT token missing userId claim");
+            return ResponseEntity.status(401)
+                    .body(ApiResponse.error("missing user key in JWT token"));
+        }
+        
         log.info("Updating profile for user ID: {}", userId);
         
         UserProfileDTO profile = userService.updateProfile(userId, updateRequest);
@@ -133,6 +139,20 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(stats));
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

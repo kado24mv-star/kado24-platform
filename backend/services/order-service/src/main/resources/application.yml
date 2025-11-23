@@ -24,8 +24,9 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  # Kafka configuration (commented out - Kafka removed from infrastructure)
+  # kafka:
+  #   bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 
 jwt:
   secret: kado24-secret-key-change-this-in-production-minimum-256-bits-required-for-security

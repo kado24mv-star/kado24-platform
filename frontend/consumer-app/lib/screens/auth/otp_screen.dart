@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../services/auth_service.dart';
 
 class OTPScreen extends StatefulWidget {
   final String phoneNumber;
+  final String? purpose; // REGISTRATION, LOGIN, PASSWORD_RESET
   
-  const OTPScreen({Key? key, required this.phoneNumber}) : super(key: key);
+  const OTPScreen({Key? key, required this.phoneNumber, this.purpose}) : super(key: key);
 
   @override
   State<OTPScreen> createState() => _OTPScreenState();
@@ -13,6 +17,8 @@ class _OTPScreenState extends State<OTPScreen> {
   final List<TextEditingController> _controllers = List.generate(6, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
   int _resendTimer = 45;
+  bool _isVerifying = false;
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -59,37 +65,42 @@ class _OTPScreenState extends State<OTPScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(6, (index) {
-                return SizedBox(
-                  width: 50,
-                  height: 60,
-                  child: TextField(
-                    controller: _controllers[index],
-                    focusNode: _focusNodes[index],
-                    textAlign: TextAlign.center,
-                    keyboardType: TextInputType.number,
-                    maxLength: 1,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    decoration: InputDecoration(
-                      counterText: '',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF667EEA), width: 2),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF667EEA), width: 3),
+                return Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: SizedBox(
+                      width: 50,
+                      height: 60,
+                      child: TextField(
+                        controller: _controllers[index],
+                        focusNode: _focusNodes[index],
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        maxLength: 1,
+                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        decoration: InputDecoration(
+                          counterText: '',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF667EEA), width: 2),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF667EEA), width: 3),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          if (value.isNotEmpty && index < 5) {
+                            _focusNodes[index + 1].requestFocus();
+                          } else if (value.isEmpty && index > 0) {
+                            _focusNodes[index - 1].requestFocus();
+                          }
+                          if (index == 5 && value.isNotEmpty) {
+                            _verifyOTP();
+                          }
+                        },
                       ),
                     ),
-                    onChanged: (value) {
-                      if (value.isNotEmpty && index < 5) {
-                        _focusNodes[index + 1].requestFocus();
-                      } else if (value.isEmpty && index > 0) {
-                        _focusNodes[index - 1].requestFocus();
-                      }
-                      if (index == 5 && value.isNotEmpty) {
-                        _verifyOTP();
-                      }
-                    },
                   ),
                 );
               }),
@@ -101,12 +112,18 @@ class _OTPScreenState extends State<OTPScreen> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: _verifyOTP,
+                onPressed: _isVerifying ? null : _verifyOTP,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF667EEA),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Verify & Continue', style: TextStyle(fontSize: 16, color: Colors.white)),
+                child: _isVerifying
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Text('Verify & Continue', style: TextStyle(fontSize: 16, color: Colors.white)),
               ),
             ),
             
@@ -137,24 +154,70 @@ class _OTPScreenState extends State<OTPScreen> {
     );
   }
 
-  void _verifyOTP() {
+  Future<void> _verifyOTP() async {
     final otp = _controllers.map((c) => c.text).join();
-    if (otp.length == 6) {
-      // TODO: Call auth-service to verify OTP
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
+    if (otp.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter complete OTP')),
       );
+      return;
+    }
+
+    setState(() => _isVerifying = true);
+
+    try {
+      final response = await _authService.verifyOTP(
+        widget.phoneNumber, 
+        otp,
+        purpose: widget.purpose,
+      );
+      
+      if (response['success'] == true) {
+        // OTP verification returns tokens directly
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        await authProvider.loginWithOTP(response);
+        
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      } else {
+        throw Exception(response['message'] ?? 'OTP verification failed');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isVerifying = false);
+      }
     }
   }
 
-  void _resendOTP() {
-    setState(() => _resendTimer = 45);
-    _startResendTimer();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('OTP sent!')),
-    );
+  Future<void> _resendOTP() async {
+    try {
+      await _authService.sendOTP(
+        widget.phoneNumber,
+        widget.purpose ?? 'LOGIN',
+      );
+      
+      setState(() => _resendTimer = 45);
+      _startResendTimer();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('OTP sent!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error sending OTP: ${e.toString()}')),
+        );
+      }
+    }
   }
 
   @override
@@ -168,18 +231,3 @@ class _OTPScreenState extends State<OTPScreen> {
     super.dispose();
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

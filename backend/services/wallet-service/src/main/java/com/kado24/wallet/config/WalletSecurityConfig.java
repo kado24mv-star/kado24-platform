@@ -68,7 +68,12 @@ public class WalletSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        // Explicitly allow frontend origins
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:8002",  // Consumer app
+                "http://localhost:8001",  // Merchant app
+                "http://localhost:4200"   // Admin portal
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "X-Request-Id"));
@@ -80,6 +85,25 @@ public class WalletSecurityConfig {
         return source;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

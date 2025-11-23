@@ -81,3 +81,22 @@ curl -X POST http://localhost:8088/api/v1/merchants/1/approve \
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

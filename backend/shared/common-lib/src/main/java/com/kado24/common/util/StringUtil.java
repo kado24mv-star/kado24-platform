@@ -128,13 +128,10 @@ public final class StringUtil {
     
     /**
      * Check if string is a valid phone number format
+     * Supports both "0" prefix (local) and "+855" prefix (international)
      */
     public static boolean isValidPhoneNumber(String phoneNumber) {
-        if (StringUtils.isBlank(phoneNumber)) {
-            return false;
-        }
-        // Cambodia phone number format: +855 followed by 8-9 digits
-        return phoneNumber.matches("^\\+855\\d{8,9}$");
+        return PhoneNumberUtil.isValid(phoneNumber);
     }
     
     /**
@@ -157,6 +154,15 @@ public final class StringUtil {
         return String.format("$%.2f", amount);
     }
 }
+
+
+
+
+
+
+
+
+
 
 
 

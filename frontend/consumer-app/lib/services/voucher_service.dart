@@ -16,6 +16,8 @@ class VoucherService {
         final vouchersList = data['data']['content'] as List;
         return vouchersList.map((v) => Voucher.fromJson(v)).toList();
       }
+    } else if (response.statusCode == 401 || response.statusCode == 403) {
+      throw Exception('${response.statusCode}:Unauthorized - Please login again');
     }
     throw Exception('Failed to load vouchers');
   }
@@ -32,6 +34,8 @@ class VoucherService {
         final vouchersList = data['data']['content'] as List;
         return vouchersList.map((v) => Voucher.fromJson(v)).toList();
       }
+    } else if (response.statusCode == 401 || response.statusCode == 403) {
+      throw Exception('${response.statusCode}:Unauthorized - Please login again');
     }
     throw Exception('Search failed');
   }
@@ -47,6 +51,8 @@ class VoucherService {
       if (data['success']) {
         return data['data'] as List;
       }
+    } else if (response.statusCode == 401 || response.statusCode == 403) {
+      throw Exception('${response.statusCode}:Unauthorized - Please login again');
     }
     throw Exception('Failed to load categories');
   }
@@ -62,6 +68,8 @@ class VoucherService {
       if (data['success']) {
         return Voucher.fromJson(data['data']);
       }
+    } else if (response.statusCode == 401 || response.statusCode == 403) {
+      throw Exception('${response.statusCode}:Unauthorized - Please login again');
     }
     throw Exception('Failed to load voucher');
   }
@@ -78,10 +86,31 @@ class VoucherService {
         final vouchersList = data['data']['content'] as List;
         return vouchersList.map((v) => Voucher.fromJson(v)).toList();
       }
+    } else if (response.statusCode == 401 || response.statusCode == 403) {
+      throw Exception('${response.statusCode}:Unauthorized - Please login again');
     }
     throw Exception('Failed to load vouchers');
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

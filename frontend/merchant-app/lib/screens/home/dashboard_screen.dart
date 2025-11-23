@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
 import '../scanner/qr_scanner_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -9,6 +11,19 @@ class DashboardScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Merchant Dashboard'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+              await authProvider.logout();
+              if (context.mounted) {
+                Navigator.pushReplacementNamed(context, '/login');
+              }
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -35,7 +50,7 @@ class DashboardScreen extends StatelessWidget {
               title: 'My Vouchers',
               color: Colors.purple,
               onTap: () {
-                // TODO: Navigate to vouchers
+                Navigator.pushNamed(context, '/my-vouchers');
               },
             ),
             _buildDashboardCard(
@@ -44,7 +59,7 @@ class DashboardScreen extends StatelessWidget {
               title: 'Transactions',
               color: Colors.green,
               onTap: () {
-                // TODO: Navigate to transactions
+                Navigator.pushNamed(context, '/transactions');
               },
             ),
             _buildDashboardCard(
@@ -53,7 +68,7 @@ class DashboardScreen extends StatelessWidget {
               title: 'Payouts',
               color: Colors.orange,
               onTap: () {
-                // TODO: Navigate to payouts
+                Navigator.pushNamed(context, '/payouts');
               },
             ),
           ],
@@ -95,6 +110,10 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 }
+
+
+
+
 
 
 

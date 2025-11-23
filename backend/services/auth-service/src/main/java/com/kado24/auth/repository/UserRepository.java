@@ -40,6 +40,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     /**
+     * Check if phone number exists with specific role
+     */
+    boolean existsByPhoneNumberAndRole(String phoneNumber, User.UserRole role);
+
+    /**
+     * Check if email exists with specific role
+     */
+    boolean existsByEmailAndRole(String email, User.UserRole role);
+
+    /**
      * Find active user by phone number
      */
     Optional<User> findByPhoneNumberAndStatus(String phoneNumber, User.UserStatus status);
@@ -49,6 +59,19 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     Optional<User> findByEmailAndStatus(String email, User.UserStatus status);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

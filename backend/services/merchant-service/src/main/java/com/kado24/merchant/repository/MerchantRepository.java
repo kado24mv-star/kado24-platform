@@ -66,3 +66,22 @@ public interface MerchantRepository extends JpaRepository<Merchant, Long> {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

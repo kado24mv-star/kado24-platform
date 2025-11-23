@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
+import 'guards/auth_guard.dart';
 import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/dashboard_screen.dart';
@@ -41,15 +42,15 @@ class Kado24MerchantApp extends StatelessWidget {
         routes: {
           '/': (context) => const SplashScreen(),
           '/login': (context) => const LoginScreen(),
-          '/dashboard': (context) => const DashboardScreen(),
-          '/pending-approval': (context) => const PendingApprovalScreen(),
-          '/qr-scanner': (context) => const QRScannerScreen(),
-          '/my-vouchers': (context) => const MyVouchersScreen(),
-          '/create-voucher': (context) => const CreateVoucherScreen(),
-          '/sales': (context) => const SalesDashboardScreen(),
-          '/payouts': (context) => const PayoutScreen(),
-          '/profile': (context) => const BusinessProfileScreen(),
-          '/transactions': (context) => const TransactionListScreen(),
+          '/dashboard': (context) => const AuthGuard(child: DashboardScreen()),
+          '/pending-approval': (context) => const AuthGuard(child: PendingApprovalScreen()),
+          '/qr-scanner': (context) => const AuthGuard(child: QRScannerScreen()),
+          '/my-vouchers': (context) => const AuthGuard(child: MyVouchersScreen()),
+          '/create-voucher': (context) => const AuthGuard(child: CreateVoucherScreen()),
+          '/sales': (context) => const AuthGuard(child: SalesDashboardScreen()),
+          '/payouts': (context) => const AuthGuard(child: PayoutScreen()),
+          '/profile': (context) => const AuthGuard(child: BusinessProfileScreen()),
+          '/transactions': (context) => const AuthGuard(child: TransactionListScreen()),
         },
       ),
     );

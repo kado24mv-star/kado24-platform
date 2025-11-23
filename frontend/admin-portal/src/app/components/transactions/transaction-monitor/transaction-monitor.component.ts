@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { PageEvent } from '@angular/material/paginator';
 import { ApiService } from '../../../services/api.service';
 
 interface Transaction {
@@ -84,6 +85,16 @@ interface Transaction {
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
       </table>
+
+      <mat-paginator 
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[10, 20, 50, 100]"
+        [pageIndex]="currentPage"
+        (page)="onPageChange($event)"
+        showFirstLastButtons
+        class="transaction-paginator">
+      </mat-paginator>
     </div>
   `,
   styles: [`
@@ -124,6 +135,12 @@ interface Transaction {
       background: #f8d7da;
       color: #721c24;
     }
+    
+    .transaction-paginator {
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-top: 16px;
+    }
   `]
 })
 export class TransactionMonitorComponent implements OnInit {
@@ -132,6 +149,11 @@ export class TransactionMonitorComponent implements OnInit {
   filteredTransactions: Transaction[] = [];
   selectedStatus: string = 'all';
   searchTerm: string = '';
+  
+  // Pagination
+  currentPage: number = 0;
+  pageSize: number = 20;
+  totalItems: number = 0;
 
   constructor(private api: ApiService) {}
 
@@ -140,28 +162,55 @@ export class TransactionMonitorComponent implements OnInit {
   }
 
   loadTransactions(): void {
-    // TODO: Call admin-portal-backend for transactions
-    // For now, mock data
-    this.transactions = [
-      {
-        id: 1,
-        orderNumber: 'ORD-20251112-001',
-        userName: 'Test User',
-        merchantName: 'Brown Coffee',
-        amount: 25.00,
-        status: 'COMPLETED',
-        createdAt: new Date().toISOString()
+    const params: any = {
+      page: this.currentPage.toString(),
+      size: this.pageSize.toString()
+    };
+    
+    if (this.selectedStatus !== 'all') {
+      params.status = this.selectedStatus;
+    }
+
+    this.api.get<any>('/api/admin/transactions', { params }).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          // Map backend response to Transaction interface
+          this.transactions = response.data.content.map((order: any) => ({
+            id: order.id,
+            orderNumber: order.orderNumber,
+            userName: `User ${order.userId}`,  // TODO: Fetch user details
+            merchantName: `Merchant ${order.merchantId}`,  // TODO: Fetch merchant details
+            amount: order.totalAmount,
+            status: order.paymentStatus,
+            createdAt: order.createdAt
+          }));
+          
+          // Update pagination metadata
+          if (response.pagination) {
+            this.totalItems = response.pagination.totalItems;
+          }
+          
+          this.applySearchFilter();
+        }
+      },
+      error: (error) => {
+        console.error('Failed to load transactions:', error);
+        // Fallback to empty array
+        this.transactions = [];
+        this.filteredTransactions = [];
+        this.totalItems = 0;
       }
-    ];
-    this.filteredTransactions = [...this.transactions];
+    });
   }
 
   filterTransactions(): void {
+    // Reset to first page when filter changes
+    this.currentPage = 0;
+    this.loadTransactions();
+  }
+
+  applySearchFilter(): void {
     let filtered = [...this.transactions];
-    
-    if (this.selectedStatus !== 'all') {
-      filtered = filtered.filter(t => t.status === this.selectedStatus);
-    }
     
     if (this.searchTerm) {
       filtered = filtered.filter(t => 
@@ -172,6 +221,12 @@ export class TransactionMonitorComponent implements OnInit {
     }
     
     this.filteredTransactions = filtered;
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadTransactions();
   }
 
   viewDetails(id: number): void {
@@ -189,6 +244,9 @@ export class TransactionMonitorComponent implements OnInit {
     });
   }
 }
+
+
+
 
 
 

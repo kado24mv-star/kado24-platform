@@ -19,3 +19,22 @@ public class VoucherReservationResponse {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -33,6 +33,7 @@ public class WalletService {
     private final WalletVoucherMapper mapper;
     private final EventPublisher eventPublisher;
     private final QRCodeGenerator qrCodeGenerator;
+    private final ExternalServiceClient externalServiceClient;
 
     @Transactional
     public WalletVoucherDTO createWalletVoucher(Long orderId, Long userId, Long voucherId, 
@@ -67,7 +68,9 @@ public class WalletService {
 
         publishVoucherCreatedNotification(voucher);
 
-        return mapper.toDTO(voucher);
+        WalletVoucherDTO dto = mapper.toDTO(voucher);
+        enrichDTOWithNames(dto, voucher);
+        return dto;
     }
 
     @Transactional
@@ -87,14 +90,20 @@ public class WalletService {
     @Transactional(readOnly = true)
     public Page<WalletVoucherDTO> getMyVouchers(Long userId, Pageable pageable) {
         Page<WalletVoucher> vouchers = repository.findByUserIdOrderByPurchasedAtDesc(userId, pageable);
-        return vouchers.map(mapper::toDTO);
+        return vouchers.map(voucher -> {
+            WalletVoucherDTO dto = mapper.toDTO(voucher);
+            enrichDTOWithNames(dto, voucher);
+            return dto;
+        });
     }
 
     @Transactional(readOnly = true)
     public WalletVoucherDTO getVoucherDetails(Long voucherId, Long userId) {
         WalletVoucher voucher = repository.findByIdAndUserId(voucherId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Wallet voucher", voucherId));
-        return mapper.toDTO(voucher);
+        WalletVoucherDTO dto = mapper.toDTO(voucher);
+        enrichDTOWithNames(dto, voucher);
+        return dto;
     }
 
     @Transactional
@@ -125,7 +134,40 @@ public class WalletService {
 
         publishVoucherGiftedNotification(voucher, senderUserId, request.getRecipientUserId());
 
-        return mapper.toDTO(voucher);
+        WalletVoucherDTO dto = mapper.toDTO(voucher);
+        enrichDTOWithNames(dto, voucher);
+        return dto;
+    }
+
+    private void enrichDTOWithNames(WalletVoucherDTO dto, WalletVoucher voucher) {
+        log.info("Enriching DTO for wallet voucher ID: {}, voucherId: {}, merchantId: {}", 
+                dto.getId(), voucher.getVoucherId(), voucher.getMerchantId());
+        
+        if (voucher.getVoucherId() != null) {
+            log.info("Fetching voucher title for voucherId: {}", voucher.getVoucherId());
+            String voucherTitle = externalServiceClient.getVoucherTitle(voucher.getVoucherId());
+            if (voucherTitle != null) {
+                log.info("Setting voucher title: {}", voucherTitle);
+                dto.setVoucherTitle(voucherTitle);
+            } else {
+                log.warn("Voucher title is null for voucherId: {}", voucher.getVoucherId());
+            }
+        } else {
+            log.warn("Voucher ID is null in wallet voucher");
+        }
+        
+        if (voucher.getMerchantId() != null) {
+            log.info("Fetching merchant name for merchantId: {}", voucher.getMerchantId());
+            String merchantName = externalServiceClient.getMerchantName(voucher.getMerchantId());
+            if (merchantName != null) {
+                log.info("Setting merchant name: {}", merchantName);
+                dto.setMerchantName(merchantName);
+            } else {
+                log.warn("Merchant name is null for merchantId: {}", voucher.getMerchantId());
+            }
+        } else {
+            log.warn("Merchant ID is null in wallet voucher");
+        }
     }
 
     private void publishVoucherCreatedNotification(WalletVoucher voucher) {

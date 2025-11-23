@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -11,11 +13,35 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
+    _checkAuth();
+  }
+
+  Future<void> _checkAuth() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    // Initialize auth state from storage
+    await authProvider.initAuth();
+    
+    await Future.delayed(const Duration(seconds: 2));
+    
+    if (mounted) {
+      // Navigate based on auth state and role
+      if (authProvider.isAuthenticated) {
+        // Check user role - only MERCHANT role can access merchant app
+        final userData = authProvider.userData;
+        final userRole = userData?['role'] as String?;
+        
+        if (userRole != 'MERCHANT') {
+          // Logout and redirect to login if not a merchant
+          await authProvider.logout();
+          Navigator.pushReplacementNamed(context, '/login');
+        } else {
+          Navigator.pushReplacementNamed(context, '/dashboard');
+        }
+      } else {
         Navigator.pushReplacementNamed(context, '/login');
       }
-    });
+    }
   }
 
   @override
@@ -52,6 +78,10 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
+
+
+
+
 
 
 

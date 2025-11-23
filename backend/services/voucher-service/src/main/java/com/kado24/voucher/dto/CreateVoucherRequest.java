@@ -43,11 +43,8 @@ public class CreateVoucherRequest {
     @Schema(description = "Discount percentage", example = "10.00")
     private BigDecimal discountPercentage;
 
-    @Schema(description = "Main image URL")
+    @Schema(description = "Voucher image URL (one image per voucher)")
     private String imageUrl;
-
-    @Schema(description = "Additional image URLs")
-    private List<String> additionalImages;
 
     @Schema(description = "Stock quantity (null if unlimited)")
     private Integer stockQuantity;
@@ -74,6 +71,20 @@ public class CreateVoucherRequest {
     @Schema(description = "Usage instructions")
     private String usageInstructions;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

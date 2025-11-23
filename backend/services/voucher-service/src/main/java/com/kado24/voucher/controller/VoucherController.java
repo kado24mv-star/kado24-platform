@@ -106,9 +106,34 @@ public class VoucherController {
             HttpServletRequest request,
             @Valid @RequestBody CreateVoucherRequest createRequest) {
         
-        Long merchantId = (Long) request.getAttribute("userId");
+        Long userId = (Long) request.getAttribute("userId");
         
-        log.info("Creating voucher for merchant: {}", merchantId);
+        if (userId == null) {
+            log.error("userId is null in request attributes. Available attributes: {}", request.getAttributeNames());
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("User ID not found in token. Please login again."));
+        }
+        
+        // Get merchant_id from user_id
+        Long merchantId;
+        try {
+            merchantId = voucherService.getMerchantIdByUserId(userId);
+        } catch (Exception e) {
+            log.error("Error getting merchant ID for user ID: {}", userId, e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Failed to retrieve merchant information. Please try again later."));
+        }
+        
+        if (merchantId == null) {
+            log.error("No merchant found for user ID: {}", userId);
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Merchant account not found for this user."));
+        }
+        
+        log.info("Creating voucher for merchant: {} (user: {})", merchantId, userId);
         
         VoucherDTO voucher = voucherService.createVoucher(merchantId, createRequest);
         
@@ -126,9 +151,23 @@ public class VoucherController {
             @PathVariable Long voucherId,
             @Valid @RequestBody UpdateVoucherRequest updateRequest) {
         
-        Long merchantId = (Long) request.getAttribute("userId");
+        Long userId = (Long) request.getAttribute("userId");
         
-        log.info("Updating voucher: {} by merchant: {}", voucherId, merchantId);
+        if (userId == null) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("User ID not found in token. Please login again."));
+        }
+        
+        // Get merchant_id from user_id
+        Long merchantId = voucherService.getMerchantIdByUserId(userId);
+        if (merchantId == null) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Merchant account not found for this user."));
+        }
+        
+        log.info("Updating voucher: {} by merchant: {} (user: {})", voucherId, merchantId, userId);
         
         VoucherDTO voucher = voucherService.updateVoucher(voucherId, merchantId, updateRequest);
         
@@ -143,13 +182,58 @@ public class VoucherController {
             HttpServletRequest request,
             @PathVariable Long voucherId) {
         
-        Long merchantId = (Long) request.getAttribute("userId");
+        Long userId = (Long) request.getAttribute("userId");
         
-        log.info("Publishing voucher: {}", voucherId);
+        if (userId == null) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("User ID not found in token. Please login again."));
+        }
+        
+        // Get merchant_id from user_id
+        Long merchantId = voucherService.getMerchantIdByUserId(userId);
+        if (merchantId == null) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Merchant account not found for this user."));
+        }
+        
+        log.info("Publishing voucher: {} by merchant: {} (user: {})", voucherId, merchantId, userId);
         
         VoucherDTO voucher = voucherService.publishVoucher(voucherId, merchantId);
         
         return ResponseEntity.ok(ApiResponse.success("Voucher published successfully", voucher));
+    }
+
+    @Operation(summary = "Pause/Unpause voucher", description = "Toggle voucher pause status (merchant only)")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('MERCHANT', 'ADMIN')")
+    @PostMapping("/{voucherId}/toggle-pause")
+    public ResponseEntity<ApiResponse<VoucherDTO>> togglePauseVoucher(
+            HttpServletRequest request,
+            @PathVariable Long voucherId) {
+        
+        Long userId = (Long) request.getAttribute("userId");
+        
+        if (userId == null) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("User ID not found in token. Please login again."));
+        }
+        
+        // Get merchant_id from user_id
+        Long merchantId = voucherService.getMerchantIdByUserId(userId);
+        if (merchantId == null) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Merchant account not found for this user."));
+        }
+        
+        log.info("Toggling pause status for voucher: {} by merchant: {} (user: {})", voucherId, merchantId, userId);
+        
+        VoucherDTO voucher = voucherService.togglePauseVoucher(voucherId, merchantId);
+        
+        return ResponseEntity.ok(ApiResponse.success("Voucher status updated successfully", voucher));
     }
 
     @Operation(summary = "Delete voucher", description = "Soft delete voucher (merchant only)")
@@ -160,9 +244,23 @@ public class VoucherController {
             HttpServletRequest request,
             @PathVariable Long voucherId) {
         
-        Long merchantId = (Long) request.getAttribute("userId");
+        Long userId = (Long) request.getAttribute("userId");
         
-        log.info("Deleting voucher: {}", voucherId);
+        if (userId == null) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("User ID not found in token. Please login again."));
+        }
+        
+        // Get merchant_id from user_id
+        Long merchantId = voucherService.getMerchantIdByUserId(userId);
+        if (merchantId == null) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Merchant account not found for this user."));
+        }
+        
+        log.info("Deleting voucher: {} by merchant: {} (user: {})", voucherId, merchantId, userId);
         
         voucherService.deleteVoucher(voucherId, merchantId);
         
@@ -177,9 +275,35 @@ public class VoucherController {
             HttpServletRequest request,
             @ModelAttribute PageRequest pageRequest) {
         
-        Long merchantId = (Long) request.getAttribute("userId");
+        Long userId = (Long) request.getAttribute("userId");
         
-        log.info("Fetching vouchers for merchant: {}", merchantId);
+        if (userId == null) {
+            log.error("userId is null in request attributes");
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("User ID not found in token. Please login again."));
+        }
+        
+        // Get merchant_id from user_id
+        // Check for null merchantId BEFORE making potentially expensive queries
+        Long merchantId;
+        try {
+            merchantId = voucherService.getMerchantIdByUserId(userId);
+        } catch (Exception e) {
+            log.error("Error getting merchant ID for user ID: {}", userId, e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Failed to retrieve merchant information. Please try again later."));
+        }
+        
+        if (merchantId == null) {
+            log.error("No merchant found for user ID: {}", userId);
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Merchant account not found for this user."));
+        }
+        
+        log.info("Fetching vouchers for merchant: {} (user: {})", merchantId, userId);
         
         Page<VoucherDTO> vouchers = voucherService.getMerchantVouchers(merchantId, pageRequest.toSpringPageRequest());
         
@@ -192,6 +316,12 @@ public class VoucherController {
         return ResponseEntity.ok(ApiResponse.paginated(vouchers, pagination));
     }
 }
+
+
+
+
+
+
 
 
 

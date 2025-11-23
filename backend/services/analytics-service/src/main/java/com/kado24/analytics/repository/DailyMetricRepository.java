@@ -26,3 +26,22 @@ public interface DailyMetricRepository extends JpaRepository<DailyMetric, Long> 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -14,6 +14,7 @@ import 'screens/orders/order_history_screen.dart';
 import 'screens/notifications/notifications_screen.dart';
 import 'screens/settings/settings_screen.dart';
 import 'screens/support/help_center_screen.dart';
+import 'screens/debug/token_verification_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,6 +64,18 @@ class Kado24App extends StatelessWidget {
           '/notifications': (context) => const NotificationsScreen(),
           '/settings': (context) => const SettingsScreen(),
           '/help': (context) => const HelpCenterScreen(),
+        },
+        onGenerateRoute: (settings) {
+          // Handle debug routes
+          if (settings.name == '/debug/tokens') {
+            return MaterialPageRoute(
+              builder: (context) => const TokenVerificationScreen(),
+            );
+          }
+          // Default to home if route not found
+          return MaterialPageRoute(
+            builder: (context) => const SplashScreen(),
+          );
         },
       ),
     );

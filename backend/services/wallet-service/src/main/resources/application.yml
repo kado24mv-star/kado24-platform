@@ -26,8 +26,9 @@ spring:
       password: ${REDIS_PASSWORD:kado24_redis_pass}
       timeout: 60000ms
   
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  # Kafka configuration (commented out - Kafka removed from infrastructure)
+  # kafka:
+  #   bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 
 jwt:
   secret: kado24-secret-key-change-this-in-production-minimum-256-bits-required-for-security
@@ -40,11 +41,20 @@ management:
 
 logging:
   level:
-    com.kado24: DEBUG
+    com.kado24: INFO
+    com.kado24.wallet: INFO
+    com.kado24.wallet.service: INFO
+    com.kado24.wallet.service.ExternalServiceClient: DEBUG
 
 internal:
   api:
     secret: ${INTERNAL_SERVICE_SECRET:kado24-internal-secret}
+
+services:
+  voucher:
+    url: ${VOUCHER_SERVICE_URL:http://kado24-voucher-service:8083}
+  merchant:
+    url: ${MERCHANT_SERVICE_URL:http://kado24-merchant-service:8088}
 
 springdoc:
   swagger-ui:

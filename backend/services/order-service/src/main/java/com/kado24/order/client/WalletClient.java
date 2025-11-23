@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -33,7 +34,8 @@ public class WalletClient {
     @Value("${services.wallet.internal-secret:kado24-internal-secret}")
     private String internalSecret;
 
-    private static final ParameterizedTypeReference<ApiResponse<Map<String, Object>>> RESPONSE_TYPE =
+    // Wallet service returns ApiResponse<List<WalletVoucherDTO>>
+    private static final ParameterizedTypeReference<ApiResponse<List<Map<String, Object>>>> RESPONSE_TYPE =
             new ParameterizedTypeReference<>() {};
 
     public void issueVouchers(WalletIssuanceRequest request) {
@@ -48,24 +50,40 @@ public class WalletClient {
         HttpEntity<WalletIssuanceRequest> entity = new HttpEntity<>(request, headers);
 
         try {
-            ResponseEntity<ApiResponse<Map<String, Object>>> response = restTemplate.exchange(
+            log.debug("Calling wallet service to issue vouchers for order {}", request.getOrderId());
+            ResponseEntity<ApiResponse<List<Map<String, Object>>>> response = restTemplate.exchange(
                     url,
                     HttpMethod.POST,
                     entity,
                     RESPONSE_TYPE
             );
 
-            if (!response.getStatusCode().is2xxSuccessful()
-                    || response.getBody() == null
-                    || !response.getBody().isSuccess()) {
-                throw new BusinessException("Wallet service rejected voucher issuance request");
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                log.warn("Wallet service returned non-2xx status: {}", response.getStatusCode());
+                throw new BusinessException("Wallet service returned status: " + response.getStatusCode());
             }
 
-            log.info("Wallet vouchers issued for order {}", request.getOrderId());
+            if (response.getBody() == null) {
+                log.warn("Wallet service returned null response body");
+                throw new BusinessException("Wallet service returned null response");
+            }
+
+            if (!response.getBody().isSuccess()) {
+                String errorMsg = response.getBody().getMessage() != null 
+                        ? response.getBody().getMessage() 
+                        : "Wallet service rejected voucher issuance request";
+                log.warn("Wallet service rejected request: {}", errorMsg);
+                throw new BusinessException(errorMsg);
+            }
+
+            List<Map<String, Object>> vouchers = response.getBody().getData();
+            int voucherCount = vouchers != null ? vouchers.size() : 0;
+            log.info("Successfully issued {} wallet voucher(s) for order {}", voucherCount, request.getOrderId());
         } catch (BusinessException ex) {
             throw ex;
         } catch (Exception ex) {
-            log.error("Failed to call wallet service to issue vouchers", ex);
+            log.error("Failed to call wallet service to issue vouchers for order {}: {}", 
+                    request.getOrderId(), ex.getMessage(), ex);
             String rootMessage = ex.getMessage() != null ? ex.getMessage() : "unknown error";
             throw new BusinessException("Unable to issue vouchers to wallet: " + rootMessage);
         }

@@ -17,35 +17,31 @@ class MapViewScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Map Placeholder (TODO: Integrate Google Maps)
+          // Map Placeholder
           Container(
             height: 300,
             color: Colors.grey[300],
-            child: Stack(
-              children: [
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.map, size: 64, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      Text(
-                        'MAP VIEW',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Showing merchants within 5km',
-                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                      ),
-                    ],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.map, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Map View',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                ),
-                // Mock pins
-                const Positioned(top: 50, left: 80, child: Text('📍', style: TextStyle(fontSize: 32))),
-                const Positioned(top: 120, right: 60, child: Text('📍', style: TextStyle(fontSize: 32))),
-                const Positioned(bottom: 60, left: 50, child: Text('📍', style: TextStyle(fontSize: 32))),
-              ],
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Text(
+                      'Google Maps integration coming soon. You\'ll be able to see nearby merchants and redemption locations on an interactive map.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           
@@ -121,6 +117,12 @@ class MapViewScreen extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+
 
 
 

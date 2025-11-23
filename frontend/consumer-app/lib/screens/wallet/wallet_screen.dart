@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
+import '../../utils/jwt_util.dart';
+import '../../utils/auth_error_handler.dart';
 import 'qr_display_screen.dart';
 
 class WalletScreen extends StatefulWidget {
-  const WalletScreen({Key? key}) : super(key: key);
+  final bool showAppBar;
+  
+  const WalletScreen({Key? key, this.showAppBar = true}) : super(key: key);
 
   @override
   State<WalletScreen> createState() => _WalletScreenState();
@@ -33,6 +37,37 @@ class _WalletScreenState extends State<WalletScreen>
 
     try {
       final authProvider = context.read<AuthProvider>();
+      
+      // Check if user is authenticated and has a valid token
+      if (!authProvider.isAuthenticated || authProvider.accessToken == null || authProvider.accessToken!.isEmpty) {
+        debugPrint('Wallet: User not authenticated or token missing');
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+        return;
+      }
+      
+      // Check if token is expired before making the request
+      if (JwtUtil.isExpired(authProvider.accessToken!)) {
+        debugPrint('Wallet: Token is expired, redirecting to login');
+        await authProvider.logout();
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+        return;
+      }
+      
+      // Debug: Log token details before making request
+      final token = authProvider.accessToken!;
+      final tokenPreview = token.length > 30 ? '${token.substring(0, 30)}...' : token;
+      final payload = JwtUtil.decodePayload(token);
+      debugPrint('Wallet: Making request with token: $tokenPreview');
+      debugPrint('Wallet: Token payload - userId: ${payload?['userId']}, exp: ${payload?['exp']}');
+      debugPrint('Wallet: Token payload keys: ${payload?.keys.toList()}');
+      debugPrint('Wallet: Token has "key" claim: ${payload?.containsKey('key')}');
+      debugPrint('Wallet: Token isExpired check: ${JwtUtil.isExpired(token)}');
+      debugPrint('Wallet: Request URL: ${ApiService.walletServiceUrl}/api/v1/wallet');
+      
       final response = await ApiService().get(
         '/api/v1/wallet',
         token: authProvider.accessToken,
@@ -48,40 +83,73 @@ class _WalletScreenState extends State<WalletScreen>
           expiredVouchers = vouchers.where((v) => v['status'] == 'EXPIRED').toList();
           isLoading = false;
         });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
       }
     } catch (e) {
       setState(() {
         isLoading = false;
       });
+      
+      // Handle authentication errors (401/403) - redirect to login
+      if (AuthErrorHandler.isAuthError(e)) {
+        debugPrint('Wallet: Auth error detected, redirecting to login');
+        AuthErrorHandler.handleAuthError(context, e);
+        return;
+      }
+      
+      // Log other errors
+      debugPrint('Error loading vouchers: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Wallet'),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          tabs: [
-            Tab(text: 'Active (${activeVouchers.length})'),
-            Tab(text: 'Used (${usedVouchers.length})'),
-            Tab(text: 'Expired (${expiredVouchers.length})'),
-          ],
-        ),
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildVoucherList(activeVouchers, 'Active'),
-                _buildVoucherList(usedVouchers, 'Used'),
-                _buildVoucherList(expiredVouchers, 'Expired'),
-              ],
-            ),
+    final tabBar = TabBar(
+      controller: _tabController,
+      indicatorColor: widget.showAppBar ? Colors.white : const Color(0xFF667EEA),
+      labelColor: widget.showAppBar ? Colors.white : Colors.white,
+      unselectedLabelColor: widget.showAppBar ? Colors.white70 : Colors.white70,
+      tabs: [
+        Tab(text: 'Active (${activeVouchers.length})'),
+        Tab(text: 'Used (${usedVouchers.length})'),
+        Tab(text: 'Expired (${expiredVouchers.length})'),
+      ],
     );
+
+    final bodyContent = isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : TabBarView(
+            controller: _tabController,
+            children: [
+              _buildVoucherList(activeVouchers, 'Active'),
+              _buildVoucherList(usedVouchers, 'Used'),
+              _buildVoucherList(expiredVouchers, 'Expired'),
+            ],
+          );
+
+    if (widget.showAppBar) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('My Wallet'),
+          bottom: tabBar,
+        ),
+        body: bodyContent,
+      );
+    } else {
+      return Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: const Color(0xFF667EEA),
+            child: tabBar,
+          ),
+          Expanded(child: bodyContent),
+        ],
+      );
+    }
   }
 
   Widget _buildVoucherList(List<dynamic> vouchers, String status) {
@@ -234,6 +302,20 @@ class _WalletScreenState extends State<WalletScreen>
     super.dispose();
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

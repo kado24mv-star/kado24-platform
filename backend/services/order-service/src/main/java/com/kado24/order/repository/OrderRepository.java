@@ -53,7 +53,20 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * Count orders by merchant
      */
     long countByMerchantId(Long merchantId);
+
+    /**
+     * Find all orders ordered by created date (Admin)
+     */
+    Page<Order> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    /**
+     * Find orders by status ordered by created date (Admin)
+     */
+    Page<Order> findByOrderStatusOrderByCreatedAtDesc(Order.OrderStatus status, Pageable pageable);
 }
+
+
+
 
 
 

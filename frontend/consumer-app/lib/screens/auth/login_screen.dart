@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/phone_util.dart';
 import 'register_screen.dart';
+import 'otp_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -167,8 +169,14 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       try {
+        // Normalize identifier if it's a phone number
+        String identifier = _identifierController.text;
+        if (PhoneUtil.isValid(identifier)) {
+          identifier = PhoneUtil.normalize(identifier) ?? identifier;
+        }
+        
         final success = await context.read<AuthProvider>().login(
-          _identifierController.text,
+          identifier,
           _passwordController.text,
         );
 
@@ -181,9 +189,54 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
-          );
+          // Check if OTP verification is required
+          // The error message should contain "OTP_VERIFICATION_REQUIRED"
+          final errorString = e.toString();
+          
+          final errorMessage = errorString.contains('Exception: ') 
+              ? errorString.split('Exception: ')[1] 
+              : errorString;
+          
+          
+          if (errorMessage.contains('OTP_VERIFICATION_REQUIRED')) {
+            // Extract phone number from identifier or error message
+            String phoneNumber = _identifierController.text;
+            
+            // Normalize phone number if it's a valid phone number
+            if (PhoneUtil.isValid(phoneNumber)) {
+              phoneNumber = PhoneUtil.normalize(phoneNumber) ?? phoneNumber;
+            } else {
+              // If identifier is email, try to extract phone from error message
+              final phoneMatch = RegExp(r'\+855\d{8,9}').firstMatch(errorString);
+              if (phoneMatch != null) {
+                phoneNumber = phoneMatch.group(0)!;
+              } else {
+                // If we can't extract, show error and ask user to use phone number
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please use your phone number to login for OTP verification'),
+                    duration: Duration(seconds: 4),
+                  ),
+                );
+                return;
+              }
+            }
+            
+            // Navigate to OTP screen
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => OTPScreen(
+                  phoneNumber: phoneNumber,
+                  purpose: 'LOGIN_VERIFICATION',
+                ),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: $e')),
+            );
+          }
         }
       }
     }
@@ -196,6 +249,14 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 }
+
+
+
+
+
+
+
+
 
 
 

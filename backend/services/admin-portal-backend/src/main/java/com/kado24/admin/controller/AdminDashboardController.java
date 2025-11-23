@@ -1,12 +1,17 @@
 package com.kado24.admin.controller;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/admin")
+@RequestMapping("/api/admin")
 @CrossOrigin(
     origins = {"http://localhost:4200", "http://localhost:9080"}, 
     allowCredentials = "true", 
@@ -15,16 +20,76 @@ import java.util.Map;
 )
 public class AdminDashboardController {
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @GetMapping("/dashboard")
     public ResponseEntity<Map<String, Object>> getDashboard() {
         Map<String, Object> response = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
         
-        data.put("totalUsers", 150);
-        data.put("totalMerchants", 28);
-        data.put("totalVouchers", 142);
-        data.put("totalOrders", 523);
-        data.put("platformRevenue", 4184.00);
+        // Get total users (excluding admin) - independent query
+        try {
+            Query userQuery = entityManager.createNativeQuery(
+                "SELECT COUNT(*) FROM auth_schema.users WHERE role != 'ADMIN'"
+            );
+            long totalUsers = ((Number) userQuery.getSingleResult()).longValue();
+            data.put("totalUsers", totalUsers);
+        } catch (Exception e) {
+            data.put("totalUsers", 0);
+        }
+        
+        // Get total merchants - independent query
+        try {
+            Query merchantQuery = entityManager.createNativeQuery(
+                "SELECT COUNT(*) FROM merchant_schema.merchants"
+            );
+            long totalMerchants = ((Number) merchantQuery.getSingleResult()).longValue();
+            data.put("totalMerchants", totalMerchants);
+        } catch (Exception e) {
+            data.put("totalMerchants", 0);
+        }
+        
+        // Get total vouchers - independent query
+        try {
+            Query voucherQuery = entityManager.createNativeQuery(
+                "SELECT COUNT(*) FROM voucher_schema.vouchers"
+            );
+            long totalVouchers = ((Number) voucherQuery.getSingleResult()).longValue();
+            data.put("totalVouchers", totalVouchers);
+        } catch (Exception e) {
+            data.put("totalVouchers", 0);
+        }
+        
+        // Get total orders - independent query
+        try {
+            Query orderQuery = entityManager.createNativeQuery(
+                "SELECT COUNT(*) FROM order_schema.orders"
+            );
+            long totalOrders = ((Number) orderQuery.getSingleResult()).longValue();
+            data.put("totalOrders", totalOrders);
+        } catch (Exception e) {
+            data.put("totalOrders", 0);
+        }
+        
+        // Get platform revenue (sum of commission from completed orders) - independent query
+        try {
+            Query revenueQuery = entityManager.createNativeQuery(
+                "SELECT COALESCE(SUM(platform_commission), 0) FROM order_schema.orders WHERE status = 'COMPLETED'"
+            );
+            Object revenueResult = revenueQuery.getSingleResult();
+            double platformRevenue = 0.0;
+            if (revenueResult != null) {
+                if (revenueResult instanceof BigDecimal) {
+                    platformRevenue = ((BigDecimal) revenueResult).doubleValue();
+                } else if (revenueResult instanceof Number) {
+                    platformRevenue = ((Number) revenueResult).doubleValue();
+                }
+            }
+            data.put("platformRevenue", platformRevenue);
+        } catch (Exception e) {
+            data.put("platformRevenue", 0.0);
+        }
         
         response.put("success", true);
         response.put("data", data);

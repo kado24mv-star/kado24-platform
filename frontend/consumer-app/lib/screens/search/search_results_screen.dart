@@ -19,7 +19,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      context.read<VoucherProvider>().searchVouchers(widget.query);
+      context.read<VoucherProvider>().searchVouchers(widget.query, context: context);
     });
   }
 
@@ -113,7 +113,11 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                                   ),
                                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                                   onTap: () {
-                                    // Navigate to voucher detail
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/voucher-detail',
+                                      arguments: voucher,
+                                    );
                                   },
                                 ),
                               );
@@ -186,17 +190,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     Navigator.pop(context);
   }
 
-  @override
-  void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
-    super.dispose();
-  }
 }
+
+
+
+
+
+
 
 
 

@@ -10,20 +10,20 @@ Kado24 Cambodia is a comprehensive digital voucher marketplace platform for the 
 ### System Architecture Diagram
 
 ```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                           PRESENTATION LAYER                               │
-├────────────────────────┬─────────────────────┬─────────────────────────────┤
-│  Flutter Consumer App  │ Flutter Merchant App│  Admin Web Portal           │
-│  (iOS/Android)         │  (iOS/Android)      │ (Spring Boot + Angular)     │
-│                        │                     │  ┌─────────────────────┐    │
-│  • Browse Vouchers     │  • QR Scanner       │  │ Angular Frontend    │    │
-│  • Purchase & Pay      │  • Voucher Mgmt     │  │ (SPA - Port 4200)   │    │
-│  • Digital Wallet      │  • Dashboard        │  │ • Dashboard         │    │
-│  • QR Codes            │  • Sales Reports    │  │ • Merchant Approval │    │
-│  • Reviews             │  • Payout Tracking  │  │ • Voucher Moderation│    │
-│                        │                     │  │ • Analytics         │    │
-│                        │                     │  └─────────────────────┘    │
-└────────────────────────┴─────────────────────┴─────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                           PRESENTATION LAYER                                                    │
+├────────────────────────┬─────────────────────┬──────────────────────────────────────────────────┤
+│  Flutter Consumer App  │ Flutter Merchant App│  Admin Web Portal                                │
+│  (iOS/Android)         │  (iOS/Android)      │ Web Application with Spring Boot and Angular     │
+│                        │                     │  ┌─────────────────────┐                         │
+│  • Browse Vouchers     │  • QR Scanner       │  │ Angular Frontend    │                         │
+│  • Purchase & Pay      │  • Voucher Mgmt     │  │ (SPA - Port 4200)   │                         │
+│  • Digital Wallet      │  • Dashboard        │  │ • Dashboard         │                         │
+│  • QR Codes            │  • Sales Reports    │  │ • Merchant Approval │                         │
+│  • Reviews             │  • Payout Tracking  │  │ • Voucher Moderation│                         │
+│                        │                     │  │ • Analytics         │                         │
+│                        │                     │  └─────────────────────┘                         │
+└────────────────────────┴─────────────────────┴──────────────────────────────────────────────────┘
                                     ↓ ↑ HTTPS/REST
 ┌────────────────────────────────────────────────────────────────────────────┐
 │                    API GATEWAY (Apache APISIX - Port 9080)                 │

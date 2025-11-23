@@ -18,8 +18,13 @@ __pycache__/
 *.egg-info/
 venv/
 env/
+.venv/
 
-# Angular
+# Node.js / Angular
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 frontend/admin-portal/.angular/
 frontend/admin-portal/dist/
 .sass-cache/
@@ -32,14 +37,41 @@ frontend/admin-portal/dist/
 .packages
 .pub-cache/
 .pub/
+*.symbols
+*.map.json
+**/doc/api/
+**/ios/Flutter/.last_build_id
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+coverage/
+.build/
+.buildlog/
 
 # IDEs
 .idea/
 .vscode/
+*.iml
+*.ipr
+*.iws
 *.swp
 *.swo
 *~
+.history/
+.atom/
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# OS files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
 
 # Temp files
 *.tmp

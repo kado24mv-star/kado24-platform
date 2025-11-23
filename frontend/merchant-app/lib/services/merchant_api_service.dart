@@ -1,15 +1,14 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config/api_config.dart';
 
 class MerchantApiService {
-  // All requests through API Gateway (APISIX)
-  static const String apiGatewayUrl = 'http://localhost:9080';
-  
-  static const String authServiceUrl = apiGatewayUrl;
-  static const String merchantServiceUrl = apiGatewayUrl;
-  static const String voucherServiceUrl = apiGatewayUrl;
-  static const String redemptionServiceUrl = apiGatewayUrl;
-  static const String payoutServiceUrl = apiGatewayUrl;
+  // Use configuration from ApiConfig
+  static String get authServiceUrl => ApiConfig.getAuthUrl();
+  static String get merchantServiceUrl => ApiConfig.getMerchantUrl();
+  static String get voucherServiceUrl => ApiConfig.getVoucherUrl();
+  static String get redemptionServiceUrl => ApiConfig.getRedemptionUrl();
+  static String get payoutServiceUrl => ApiConfig.getPayoutUrl();
 
   // Register Merchant
   Future<Map<String, dynamic>> registerMerchant({
@@ -27,6 +26,8 @@ class MerchantApiService {
 
     if (response.statusCode == 201 || response.statusCode == 200) {
       return jsonDecode(response.body);
+    } else if (response.statusCode == 401 || response.statusCode == 403) {
+      throw Exception('${response.statusCode}:Unauthorized - Please login again');
     }
     throw Exception('Merchant registration failed');
   }
@@ -47,6 +48,8 @@ class MerchantApiService {
 
     if (response.statusCode == 201 || response.statusCode == 200) {
       return jsonDecode(response.body);
+    } else if (response.statusCode == 401 || response.statusCode == 403) {
+      throw Exception('${response.statusCode}:Unauthorized - Please login again');
     }
     throw Exception('Voucher creation failed');
   }
@@ -73,6 +76,8 @@ class MerchantApiService {
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
+    } else if (response.statusCode == 401 || response.statusCode == 403) {
+      throw Exception('${response.statusCode}:Unauthorized - Please login again');
     }
     throw Exception('Redemption failed');
   }
@@ -89,6 +94,8 @@ class MerchantApiService {
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
+    } else if (response.statusCode == 401 || response.statusCode == 403) {
+      throw Exception('${response.statusCode}:Unauthorized - Please login again');
     }
     throw Exception('Failed to load vouchers');
   }
@@ -105,6 +112,8 @@ class MerchantApiService {
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
+    } else if (response.statusCode == 401 || response.statusCode == 403) {
+      throw Exception('${response.statusCode}:Unauthorized - Please login again');
     }
     throw Exception('Failed to load payouts');
   }

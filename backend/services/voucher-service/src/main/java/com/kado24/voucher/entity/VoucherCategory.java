@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  * Voucher Category entity
  */
 @Entity
-@Table(name = "voucher_categories", schema = "shared_schema")
+@Table(name = "voucher_categories", schema = "voucher_schema")
 @Data
 @Builder
 @NoArgsConstructor

@@ -164,6 +164,60 @@ public class MerchantController {
 
         return ResponseEntity.ok(ApiResponse.success(stats));
     }
+
+    // Admin endpoints (public for admin-portal-backend proxy)
+    @Operation(summary = "Get pending merchants (Admin API)", description = "Get merchants awaiting approval for admin portal")
+    @GetMapping("/admin/pending")
+    public ResponseEntity<ApiResponse<Page<MerchantDTO>>> getAdminPendingMerchants(
+            @ModelAttribute PageRequest pageRequest) {
+
+        log.info("Admin API: Fetching pending merchants");
+
+        Page<MerchantDTO> merchants = merchantService.getPendingMerchants(pageRequest.toSpringPageRequest());
+
+        PaginationMeta pagination = PaginationMeta.from(
+                merchants.getNumber(),
+                merchants.getSize(),
+                merchants.getTotalElements()
+        );
+
+        return ResponseEntity.ok(ApiResponse.paginated(merchants, pagination));
+    }
+
+    @Operation(summary = "Approve merchant (Admin API)", description = "Approve merchant application from admin portal")
+    @PostMapping("/admin/{merchantId}/approve")
+    public ResponseEntity<ApiResponse<MerchantDTO>> adminApproveMerchant(@PathVariable Long merchantId) {
+        log.info("Admin API: Approving merchant: {}", merchantId);
+
+        // Using default adminId of 1 for admin portal
+        MerchantDTO merchant = merchantService.approveMerchant(merchantId, 1L);
+
+        return ResponseEntity.ok(ApiResponse.success("Merchant approved successfully", merchant));
+    }
+
+    @Operation(summary = "Reject merchant (Admin API)", description = "Reject merchant application from admin portal")
+    @PostMapping("/admin/{merchantId}/reject")
+    public ResponseEntity<ApiResponse<MerchantDTO>> adminRejectMerchant(
+            @PathVariable Long merchantId,
+            @RequestParam String reason) {
+
+        log.info("Admin API: Rejecting merchant: {}", merchantId);
+
+        // Using default adminId of 1 for admin portal
+        MerchantDTO merchant = merchantService.rejectMerchant(merchantId, 1L, reason);
+
+        return ResponseEntity.ok(ApiResponse.success("Merchant rejected", merchant));
+    }
+
+    @Operation(summary = "Get merchant details (Admin API)", description = "Get merchant details by ID for admin portal")
+    @GetMapping("/admin/{merchantId}")
+    public ResponseEntity<ApiResponse<MerchantDTO>> getAdminMerchantDetails(@PathVariable Long merchantId) {
+        log.info("Admin API: Fetching merchant details: {}", merchantId);
+
+        MerchantDTO merchant = merchantService.getMerchant(merchantId);
+
+        return ResponseEntity.ok(ApiResponse.success(merchant));
+    }
 }
 
 

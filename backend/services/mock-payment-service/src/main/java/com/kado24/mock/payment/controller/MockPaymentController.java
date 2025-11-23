@@ -26,15 +26,26 @@ public class MockPaymentController {
      */
     @PostMapping("/init")
     public ResponseEntity<MockPaymentResponse> initPayment(@RequestBody MockPaymentRequest request) {
-        log.info("Mock payment initiated: {} for amount: {}", request.getOrderId(), request.getAmount());
+        log.info("Mock payment initiated: {} for amount: {} using method: {}", 
+                request.getOrderId(), request.getAmount(), request.getMethod());
 
-        String paymentId = "MOCK-" + request.getMethod().toUpperCase() + "-" + UUID.randomUUID().toString().substring(0, 8);
+        // Support all payment methods: ABA, WING, PIPAY, KHQR, or default to MOCK
+        String method = request.getMethod() != null && !request.getMethod().isEmpty() 
+                ? request.getMethod().toUpperCase() 
+                : "MOCK";
+        
+        // Validate method
+        if (!method.matches("ABA|WING|PIPAY|KHQR|MOCK")) {
+            method = "MOCK";
+        }
+
+        String paymentId = "MOCK-" + method + "-" + UUID.randomUUID().toString().substring(0, 8);
 
         MockPaymentResponse response = MockPaymentResponse.builder()
                 .paymentId(paymentId)
                 .orderId(request.getOrderId())
                 .amount(request.getAmount())
-                .paymentUrl("http://localhost:8095/mock/payment/page?id=" + paymentId)
+                .paymentUrl("http://localhost:9080/api/mock/payment/page?id=" + paymentId + "&orderId=" + request.getOrderId() + "&amount=" + request.getAmount() + "&method=" + method)
                 .qrCode("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==")
                 .expiresIn(900) // 15 minutes
                 .status("INITIATED")
@@ -47,14 +58,62 @@ public class MockPaymentController {
 
     /**
      * Payment page (HTML)
+     * Supports both id parameter and amount/orderId parameters
      */
     @GetMapping("/page")
-    public String paymentPage(@RequestParam String id) {
-        MockPaymentResponse payment = payments.get(id);
+    public String paymentPage(
+            @RequestParam(required = false) String id,
+            @RequestParam(required = false) String orderId,
+            @RequestParam(required = false) Double amount,
+            @RequestParam(required = false) String method) {
+        
+        MockPaymentResponse payment = null;
+        
+        // Try to find by id first
+        if (id != null && !id.isEmpty()) {
+            payment = payments.get(id);
+        }
+        
+        // If not found and we have orderId/amount, create a temporary payment entry
+        if (payment == null && orderId != null && amount != null) {
+            log.info("Creating temporary payment page for orderId: {}, amount: {}, method: {}", orderId, amount, method);
+            String tempId = id != null && !id.isEmpty() ? id : "TEMP-" + orderId + "-" + System.currentTimeMillis();
+            payment = MockPaymentResponse.builder()
+                    .paymentId(tempId)
+                    .orderId(orderId)
+                    .amount(java.math.BigDecimal.valueOf(amount))
+                    .status("PENDING")
+                    .build();
+            payments.put(tempId, payment);
+        }
+        
+        // Determine payment method display name
+        String methodDisplay = method != null && !method.isEmpty() ? method.toUpperCase() : "MOCK";
+        String methodName;
+        switch (methodDisplay) {
+            case "ABA":
+                methodName = "ABA Bank";
+                break;
+            case "WING":
+                methodName = "Wing Money";
+                break;
+            case "PIPAY":
+                methodName = "Pi Pay";
+                break;
+            case "KHQR":
+                methodName = "KHQR";
+                break;
+            default:
+                methodName = "Mock Payment";
+                break;
+        }
+        
         if (payment == null) {
-            return "<html><body><h1>Payment not found</h1></body></html>";
+            return "<html><body><h1>Payment not found. Please provide either 'id' or 'orderId' and 'amount' parameters.</h1></body></html>";
         }
 
+        String paymentIdToUse = payment.getPaymentId() != null ? payment.getPaymentId() : (id != null ? id : "UNKNOWN");
+        
         return """
                 <html>
                 <head>
@@ -71,7 +130,7 @@ public class MockPaymentController {
                 </head>
                 <body>
                     <div class="container">
-                        <h1>🏦 Mock Payment Gateway</h1>
+                        <h1>🏦 %s</h1>
                         <p>Payment ID: %s</p>
                         <div class="amount">$%.2f</div>
                         <p>Order: %s</p>
@@ -80,16 +139,24 @@ public class MockPaymentController {
                     </div>
                     <script>
                         function processPayment(success) {
-                            fetch('/api/mock/payment/process?id=%s&success=' + success, {method: 'POST'})
+                            const baseUrl = window.location.origin;
+                            fetch(baseUrl + '/api/mock/payment/process?id=%s&success=' + success, {method: 'POST'})
                                 .then(() => {
                                     alert(success ? 'Payment successful!' : 'Payment failed!');
-                                    window.close();
+                                    if (window.opener) {
+                                        window.opener.postMessage({type: 'payment', success: success, paymentId: '%s'}, '*');
+                                    }
+                                    setTimeout(() => window.close(), 1000);
+                                })
+                                .catch(err => {
+                                    console.error('Payment error:', err);
+                                    alert('Payment processing error. Please try again.');
                                 });
                         }
                     </script>
                 </body>
                 </html>
-                """.formatted(id, payment.getAmount(), payment.getOrderId(), id);
+                """.formatted(methodName, paymentIdToUse, payment.getAmount(), payment.getOrderId(), paymentIdToUse, paymentIdToUse);
     }
 
     /**
@@ -132,6 +199,21 @@ public class MockPaymentController {
         return ResponseEntity.ok(payment);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

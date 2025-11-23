@@ -1,35 +1,6 @@
 version: '3.8'
-
+name: Infrastructure
 services:
-  # ============================================
-  # PostgreSQL Database - FOR CONTAINERIZED BACKEND
-  # ============================================
-  
-  postgres:
-    profiles:
-      - local-db
-    image: postgres:17
-    container_name: kado24-postgres
-    environment:
-      POSTGRES_DB: kado24_db
-      POSTGRES_USER: kado24_user
-      POSTGRES_PASSWORD: kado24_pass
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ../../scripts/00-create-user.sql:/docker-entrypoint-initdb.d/00-create-user.sql
-      - ../../scripts/init-database-schemas.sql:/docker-entrypoint-initdb.d/01-init-database-schemas.sql
-    networks:
-      - kado24-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kado24_user -d kado24_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
   # ============================================
   # Redis Cache
   # ============================================
@@ -48,73 +19,6 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
-    restart: unless-stopped
-
-  # ============================================
-  # Apache Kafka & Zookeeper
-  # ============================================
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    container_name: kado24-zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
-    volumes:
-      - zookeeper_data:/var/lib/zookeeper/data
-      - zookeeper_log:/var/lib/zookeeper/log
-    networks:
-      - kado24-network
-    restart: unless-stopped
-
-  kafka:
-    image: confluentinc/cp-kafka:7.5.0
-    container_name: kado24-kafka
-    depends_on:
-      - zookeeper
-    ports:
-      - "9092:9092"
-      - "9093:9093"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      KAFKA_LOG_RETENTION_HOURS: 168
-      KAFKA_LOG_SEGMENT_BYTES: 1073741824
-    volumes:
-      - kafka_data:/var/lib/kafka/data
-    networks:
-      - kado24-network
-    healthcheck:
-      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-    restart: unless-stopped
-
-  # ============================================
-  # Kafka UI (for development)
-  # ============================================
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kado24-kafka-ui
-    depends_on:
-      - kafka
-    ports:
-      - "9000:8080"
-    environment:
-      KAFKA_CLUSTERS_0_NAME: kado24-local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
-      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
-    networks:
-      - kado24-network
     restart: unless-stopped
 
   # ============================================
@@ -150,63 +54,7 @@ services:
       - "9443:9443"    # HTTPS
     volumes:
       - ../../gateway/apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
-      - ../../gateway/apisix/logs:/usr/local/apisix/logs
-    networks:
-      - kado24-network
-    restart: unless-stopped
-
-  # ============================================
-  # Prometheus for Metrics
-  # ============================================
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: kado24-prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.enable-lifecycle'
-    networks:
-      - kado24-network
-    restart: unless-stopped
-
-  # ============================================
-  # Grafana for Visualization
-  # ============================================
-  grafana:
-    image: grafana/grafana:latest
-    container_name: kado24-grafana
-    depends_on:
-      - prometheus
-    ports:
-      - "3000:3000"
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
-      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
-    networks:
-      - kado24-network
-    restart: unless-stopped
-
-  # ============================================
-  # Adminer - Database Management UI
-  # ============================================
-  adminer:
-    image: adminer:latest
-    container_name: kado24-adminer
-    ports:
-      - "8080:8080"
-    environment:
-      ADMINER_DEFAULT_SERVER: localhost
+      # - ../../gateway/apisix/logs:/usr/local/apisix/logs  # Commented out due to Windows permission issues
     networks:
       - kado24-network
     restart: unless-stopped
@@ -231,22 +79,10 @@ services:
 # Volumes
 # ============================================
 volumes:
-  postgres_data:
-    name: kado24_postgres_data
   redis_data:
     name: kado24_redis_data
-  zookeeper_data:
-    name: kado24_zookeeper_data
-  zookeeper_log:
-    name: kado24_zookeeper_log
-  kafka_data:
-    name: kado24_kafka_data
   etcd_data:
     name: kado24_etcd_data
-  prometheus_data:
-    name: kado24_prometheus_data
-  grafana_data:
-    name: kado24_grafana_data
 
 # ============================================
 # Networks

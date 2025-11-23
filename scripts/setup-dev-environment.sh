@@ -59,7 +59,7 @@ echo -e "${GREEN}✓ All prerequisites are installed${NC}"
 echo ""
 
 # Start infrastructure services
-echo "🐳 Starting infrastructure services (Redis, Kafka, etc.)..."
+echo "🐳 Starting infrastructure services (Redis, APISIX, etc.)..."
 cd infrastructure/docker
 docker-compose up -d
 if [ "$USE_DOCKER_POSTGRES" = "true" ]; then
@@ -96,14 +96,6 @@ until docker exec kado24-redis redis-cli --pass kado24_redis_pass ping > /dev/nu
     sleep 2
 done
 echo -e "${GREEN}✓${NC} Redis is ready"
-
-# Check if Kafka is ready
-echo "🔍 Checking Kafka..."
-until docker exec kado24-kafka kafka-broker-api-versions --bootstrap-server localhost:9092 > /dev/null 2>&1; do
-    echo "   Waiting for Kafka..."
-    sleep 2
-done
-echo -e "${GREEN}✓${NC} Kafka is ready"
 
 cd ../..
 
@@ -148,17 +140,12 @@ echo "   🌐 API Gateway:          http://localhost:9080"
 echo "   🔧 APISIX Admin:         http://localhost:9091"
 echo "   🗄️  PostgreSQL:           localhost:5432"
 echo "   📦 Redis:                localhost:6379"
-echo "   📨 Kafka:                localhost:9092"
-echo "   📊 Prometheus:           http://localhost:9090"
-echo "   📈 Grafana:              http://localhost:3000"
-echo "   🔧 Database Admin:       http://localhost:8080"
-echo "   🔍 Kafka UI:             http://localhost:9000"
+echo "   🔍 Redis Commander:      http://localhost:8090"
 echo "   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "🔐 Default Credentials:"
 echo "   Database: kado24_user / kado24_pass"
 echo "   Redis:    kado24_redis_pass"
-echo "   Grafana:  admin / admin"
 echo "   Admin:    admin@kado24.com / Admin@123456"
 echo ""
 echo "🚀 Next Steps:"

@@ -47,6 +47,9 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers(
                                 "/api/v1/auth/**",
+                                "/api/v1/admin/**",
+                                "/api/v1/orders/admin/**",
+                                "/api/v1/*/admin/**",
                                 "/actuator/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
@@ -75,7 +78,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        // Allow all origins explicitly for development
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:8002",  // Consumer app
+                "http://localhost:8001",  // Merchant app
+                "http://localhost:4200"   // Admin portal
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "X-Request-Id"));

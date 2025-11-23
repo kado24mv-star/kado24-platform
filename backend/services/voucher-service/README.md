@@ -13,6 +13,7 @@ Voucher management service for the Kado24 platform.
 - Publish vouchers (merchant)
 - Delete vouchers (merchant)
 - Manage categories
+- Image upload support (base64 data URLs with unlimited length)
 
 ## 🚀 Quick Start
 
@@ -82,9 +83,12 @@ curl -X POST http://localhost:8083/api/v1/vouchers \
     "termsAndConditions": "Valid for 1 year",
     "denominations": [5.00, 10.00, 25.00, 50.00],
     "unlimitedStock": false,
-    "stockQuantity": 100
+    "stockQuantity": 100,
+    "imageUrl": "data:image/jpeg;base64,..."
   }'
 ```
+
+**Note:** The `imageUrl` field supports base64 data URLs of unlimited length (TEXT column type).
 
 ## 🔒 Security
 
@@ -131,6 +135,20 @@ voucher-service/
 - common-lib, security-lib, kafka-lib
 - PostgreSQL, Redis, Kafka
 - Spring Boot 3.2+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

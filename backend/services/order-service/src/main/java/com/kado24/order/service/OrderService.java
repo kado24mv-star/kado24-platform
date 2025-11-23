@@ -155,6 +155,28 @@ public class OrderService {
     }
 
     /**
+     * Get all orders (Admin)
+     */
+    public Page<OrderDTO> getAllOrders(Pageable pageable, String status) {
+        log.debug("Fetching all orders for admin with status filter: {}", status);
+
+        Page<Order> orders;
+        if (status != null && !status.isEmpty()) {
+            try {
+                Order.OrderStatus orderStatus = Order.OrderStatus.valueOf(status.toUpperCase());
+                orders = orderRepository.findByOrderStatusOrderByCreatedAtDesc(orderStatus, pageable);
+            } catch (IllegalArgumentException e) {
+                // Invalid status, return all
+                orders = orderRepository.findAllByOrderByCreatedAtDesc(pageable);
+            }
+        } else {
+            orders = orderRepository.findAllByOrderByCreatedAtDesc(pageable);
+        }
+
+        return orders.map(orderMapper::toDTO);
+    }
+
+    /**
      * Confirm order (called after successful payment)
      */
     @Transactional

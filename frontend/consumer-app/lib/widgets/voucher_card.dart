@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/voucher.dart';
+import '../screens/voucher/voucher_detail_screen.dart';
 
 class VoucherCard extends StatelessWidget {
   final Voucher voucher;
@@ -16,7 +17,12 @@ class VoucherCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () {
-          // TODO: Navigate to voucher details
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VoucherDetailScreen(voucher: voucher),
+            ),
+          );
         },
         borderRadius: BorderRadius.circular(12),
         child: Column(
@@ -57,15 +63,18 @@ class VoucherCard extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      voucher.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                    Flexible(
+                      child: Text(
+                        voucher.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -82,16 +91,20 @@ class VoucherCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         if (voucher.denominations.isNotEmpty)
-                          Text(
-                            '\$${voucher.denominations.first.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: Color(0xFF667EEA),
+                          Flexible(
+                            child: Text(
+                              '\$${voucher.denominations.first.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Color(0xFF667EEA),
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         if (voucher.rating != null)
                           Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(Icons.star, size: 16, color: Colors.amber),
                               const SizedBox(width: 4),
@@ -113,6 +126,21 @@ class VoucherCard extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

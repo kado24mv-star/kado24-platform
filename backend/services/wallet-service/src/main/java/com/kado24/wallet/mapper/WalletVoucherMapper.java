@@ -31,3 +31,22 @@ public interface WalletVoucherMapper {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/phone_util.dart';
+import 'otp_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -92,8 +94,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             if (value == null || value.isEmpty) {
                               return 'Please enter phone number';
                             }
-                            if (!value.startsWith('+855')) {
-                              return 'Phone must start with +855';
+                            if (!PhoneUtil.isValid(value)) {
+                              return 'Phone must be in format 0XXXXXXXX or +855XXXXXXXX';
                             }
                             return null;
                           },
@@ -186,20 +188,74 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _handleRegister() async {
     if (_formKey.currentState!.validate()) {
       try {
+        // Normalize phone number and validate
+        String phoneNumber = _phoneController.text;
+        final normalized = PhoneUtil.normalize(phoneNumber);
+        if (normalized == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Invalid phone number format. Please use 0XXXXXXXX or +855XXXXXXXX'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+          return;
+        }
+        phoneNumber = normalized;
+        
         final success = await context.read<AuthProvider>().register(
           fullName: _fullNameController.text,
-          phoneNumber: _phoneController.text,
+          phoneNumber: phoneNumber,
           email: _emailController.text,
           password: _passwordController.text,
         );
 
         if (success && mounted) {
-          Navigator.pushReplacementNamed(context, '/home');
+          // Navigate to OTP verification screen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => OTPScreen(
+                phoneNumber: phoneNumber,
+                purpose: 'REGISTRATION',
+              ),
+            ),
+          );
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Registration failed. Please try again.'),
+              duration: Duration(seconds: 3),
+            ),
+          );
         }
       } catch (e) {
         if (mounted) {
+          // Extract error message
+          String errorMessage = e.toString();
+          if (errorMessage.contains('Exception:')) {
+            errorMessage = errorMessage.split('Exception:')[1].trim();
+          }
+          
+          // Show user-friendly error messages
+          String displayMessage;
+          if (errorMessage.toLowerCase().contains('already registered') || 
+              errorMessage.toLowerCase().contains('already exists')) {
+            displayMessage = 'This phone number or email is already registered. Please login instead.';
+          } else if (errorMessage.toLowerCase().contains('validation')) {
+            displayMessage = 'Please check your information and try again.';
+          } else if (errorMessage.toLowerCase().contains('network')) {
+            displayMessage = 'Network error. Please check your connection and try again.';
+          } else {
+            displayMessage = errorMessage.isNotEmpty 
+                ? errorMessage 
+                : 'Registration failed. Please try again later.';
+          }
+          
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(
+              content: Text(displayMessage),
+              duration: const Duration(seconds: 4),
+            ),
           );
         }
       }
@@ -215,6 +271,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 }
+
+
+
+
+
+
+
+
 
 
 

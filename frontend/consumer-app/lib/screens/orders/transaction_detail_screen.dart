@@ -110,3 +110,22 @@ class TransactionDetailScreen extends StatelessWidget {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

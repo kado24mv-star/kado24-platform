@@ -236,3 +236,22 @@ export class MerchantDetailComponent implements OnInit {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

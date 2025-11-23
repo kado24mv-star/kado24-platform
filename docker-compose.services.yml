@@ -9,7 +9,7 @@ x-backend-env: &backend-env
   REDIS_HOST: kado24-redis
   REDIS_PORT: "6379"
   REDIS_PASSWORD: kado24_redis_pass
-  KAFKA_BOOTSTRAP_SERVERS: kado24-kafka:9093
+  # KAFKA_BOOTSTRAP_SERVERS: kado24-kafka:9093  # Commented out - Kafka removed from infrastructure
   SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "3"
 
 services:
@@ -118,7 +118,9 @@ services:
       - "9443:9443"
     volumes:
       - ./gateway/apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
-      - ./gateway/apisix/logs:/usr/local/apisix/logs
+      # Logs volume commented out due to Windows permission issues
+      # Logs can still be accessed via: docker logs kado24-apisix
+      # - ./gateway/apisix/logs:/usr/local/apisix/logs
     networks:
       - kado24-network
     restart: unless-stopped
@@ -309,15 +311,15 @@ services:
       - kado24-network
 
   payment-service:
-    container_name: kado24-payment-service
+    container_name: kado24-mock-payment-service
     build:
       context: ./backend/services/mock-payment-service
-    image: kado24/payment-service:latest
+    image: kado24/mock-payment-service:latest
     ports:
-      - "8085:8085"
+      - "8095:8095"
     environment:
       <<: *backend-env
-      SERVER_PORT: "8085"
+      SERVER_PORT: "8095"
     networks:
       - kado24-network
 

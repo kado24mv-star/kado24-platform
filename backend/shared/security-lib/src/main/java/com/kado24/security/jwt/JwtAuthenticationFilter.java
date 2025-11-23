@@ -41,6 +41,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String rolesStr = jwtTokenProvider.getRolesFromToken(jwt);
                 Long userId = jwtTokenProvider.getUserIdFromToken(jwt);
 
+                // Validate that userId exists in token - required for user-service endpoints
+                if (userId == null) {
+                    log.warn("JWT token missing userId claim for user: {}", username);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":{\"message\":\"missing user key in JWT token\"}}");
+                    return;
+                }
+
                 // Convert roles string to authorities
                 List<SimpleGrantedAuthority> authorities = Arrays.stream(rolesStr.split(","))
                         .map(String::trim)
@@ -58,8 +67,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 request.setAttribute("username", username);
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                
-                log.debug("Set authentication for user: {} with roles: {}", username, rolesStr);
             }
         } catch (Exception ex) {
             log.error("Could not set user authentication in security context", ex);
@@ -87,6 +94,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

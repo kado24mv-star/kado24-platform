@@ -29,6 +29,9 @@ dependencies:
   # Utilities
   intl: ^0.18.1
   
+  # File Picker
+  file_picker: ^6.1.1
+  
   cupertino_icons: ^1.0.6
 
 dev_dependencies:
@@ -38,6 +41,20 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

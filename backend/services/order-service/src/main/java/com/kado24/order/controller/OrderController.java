@@ -93,7 +93,29 @@ public class OrderController {
 
         return ResponseEntity.ok(ApiResponse.success("Order cancelled successfully", null));
     }
+
+    @Operation(summary = "Get all orders (Admin)", description = "Get all orders for admin dashboard")
+    @GetMapping("/admin/all")
+    public ResponseEntity<ApiResponse<Page<OrderDTO>>> getAllOrders(
+            @RequestParam(required = false) String status,
+            @ModelAttribute PageRequest pageRequest) {
+
+        log.info("Fetching all orders for admin");
+
+        Page<OrderDTO> orders = orderService.getAllOrders(pageRequest.toSpringPageRequest(), status);
+
+        PaginationMeta pagination = PaginationMeta.from(
+                orders.getNumber(),
+                orders.getSize(),
+                orders.getTotalElements()
+        );
+
+        return ResponseEntity.ok(ApiResponse.paginated(orders, pagination));
+    }
 }
+
+
+
 
 
 

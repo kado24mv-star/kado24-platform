@@ -24,7 +24,7 @@ CREATE SCHEMA IF NOT EXISTS notification_schema;
 CREATE SCHEMA IF NOT EXISTS payout_schema;
 CREATE SCHEMA IF NOT EXISTS analytics_schema;
 CREATE SCHEMA IF NOT EXISTS admin_schema;
-CREATE SCHEMA IF NOT EXISTS shared_schema;  -- For lookup tables shared across services
+CREATE SCHEMA IF NOT EXISTS system_schema;  -- For system-wide configuration and reference data
 
 COMMENT ON SCHEMA auth_schema IS 'Authentication & Authorization Service Schema';
 COMMENT ON SCHEMA user_schema IS 'User Management Service Schema';
@@ -37,7 +37,7 @@ COMMENT ON SCHEMA notification_schema IS 'Notification Service Schema';
 COMMENT ON SCHEMA payout_schema IS 'Payout Service Schema';
 COMMENT ON SCHEMA analytics_schema IS 'Analytics Service Schema';
 COMMENT ON SCHEMA admin_schema IS 'Admin Portal Service Schema';
-COMMENT ON SCHEMA shared_schema IS 'Shared lookup tables and reference data';
+COMMENT ON SCHEMA system_schema IS 'System-wide configuration and reference data';
 
 -- =============================================
 -- GRANT PERMISSIONS
@@ -54,7 +54,7 @@ GRANT USAGE ON SCHEMA notification_schema TO kado24_user;
 GRANT USAGE ON SCHEMA payout_schema TO kado24_user;
 GRANT USAGE ON SCHEMA analytics_schema TO kado24_user;
 GRANT USAGE ON SCHEMA admin_schema TO kado24_user;
-GRANT USAGE ON SCHEMA shared_schema TO kado24_user;
+GRANT USAGE ON SCHEMA system_schema TO kado24_user;
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA auth_schema TO kado24_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA user_schema TO kado24_user;
@@ -67,7 +67,7 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA notification_schema TO kado24_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA payout_schema TO kado24_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA analytics_schema TO kado24_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA admin_schema TO kado24_user;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA shared_schema TO kado24_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA system_schema TO kado24_user;
 
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA auth_schema TO kado24_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA user_schema TO kado24_user;
@@ -80,30 +80,16 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA notification_schema TO kado24_us
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA payout_schema TO kado24_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA analytics_schema TO kado24_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA admin_schema TO kado24_user;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA shared_schema TO kado24_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA system_schema TO kado24_user;
 
 -- =============================================
--- SHARED SCHEMA - Reference Data
+-- SYSTEM SCHEMA - System Configuration
 -- =============================================
 
--- Voucher Categories (shared reference)
-CREATE TABLE shared_schema.voucher_categories (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(100) UNIQUE NOT NULL,
-    display_name VARCHAR(255) NOT NULL,
-    icon VARCHAR(100),
-    color VARCHAR(20),
-    sort_order INT DEFAULT 0,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+-- Note: Voucher Categories moved to voucher_schema (see VOUCHER SCHEMA section)
 
-CREATE INDEX idx_shared_categories_active ON shared_schema.voucher_categories(is_active);
-
-COMMENT ON TABLE shared_schema.voucher_categories IS 'Shared voucher categories (Food, Spa, Entertainment, etc.)';
-
--- System Settings (shared)
-CREATE TABLE shared_schema.system_settings (
+-- System Settings
+CREATE TABLE system_schema.system_settings (
     key VARCHAR(100) PRIMARY KEY,
     value TEXT NOT NULL,
     value_type VARCHAR(20) DEFAULT 'STRING',
@@ -113,7 +99,7 @@ CREATE TABLE shared_schema.system_settings (
     updated_by VARCHAR(255)
 );
 
-COMMENT ON TABLE shared_schema.system_settings IS 'Platform-wide configuration settings';
+COMMENT ON TABLE system_schema.system_settings IS 'Platform-wide configuration settings';
 
 -- =============================================
 -- AUTH SCHEMA - Authentication & Authorization
@@ -122,7 +108,7 @@ COMMENT ON TABLE shared_schema.system_settings IS 'Platform-wide configuration s
 CREATE TABLE auth_schema.users (
     id BIGSERIAL PRIMARY KEY,
     full_name VARCHAR(255) NOT NULL,
-    phone_number VARCHAR(20) UNIQUE NOT NULL,
+    phone_number VARCHAR(20) NOT NULL,
     email VARCHAR(255) UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL CHECK (role IN ('CONSUMER', 'MERCHANT', 'ADMIN')),
@@ -135,7 +121,8 @@ CREATE TABLE auth_schema.users (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_login_at TIMESTAMP,
     metadata JSONB,
-    CONSTRAINT chk_contact CHECK (email IS NOT NULL OR phone_number IS NOT NULL)
+    CONSTRAINT chk_contact CHECK (email IS NOT NULL OR phone_number IS NOT NULL),
+    CONSTRAINT users_phone_role_unique UNIQUE (phone_number, role)
 );
 
 CREATE INDEX idx_auth_users_phone ON auth_schema.users(phone_number);
@@ -172,6 +159,113 @@ CREATE TABLE auth_schema.oauth2_tokens (
 CREATE INDEX idx_auth_tokens_user ON auth_schema.oauth2_tokens(user_id);
 CREATE INDEX idx_auth_tokens_access ON auth_schema.oauth2_tokens(access_token);
 CREATE INDEX idx_auth_tokens_refresh ON auth_schema.oauth2_tokens(refresh_token);
+
+-- Verification Requests (for OTP verification and admin support)
+CREATE TABLE auth_schema.verification_requests (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES auth_schema.users(id) ON DELETE CASCADE,
+    phone_number VARCHAR(20) NOT NULL,
+    otp_code VARCHAR(6) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+        CHECK (status IN ('PENDING', 'VERIFIED', 'REJECTED', 'EXPIRED')),
+    verification_method VARCHAR(20) NOT NULL DEFAULT 'OTP',
+        CHECK (verification_method IN ('OTP', 'MANUAL', 'AUTO')),
+    requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    verified_at TIMESTAMP,
+    verified_by BIGINT REFERENCES auth_schema.users(id),
+    expires_at TIMESTAMP NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_verification_user_id ON auth_schema.verification_requests(user_id);
+CREATE INDEX idx_verification_status ON auth_schema.verification_requests(status);
+CREATE INDEX idx_verification_phone ON auth_schema.verification_requests(phone_number);
+CREATE INDEX idx_verification_expires ON auth_schema.verification_requests(expires_at);
+
+COMMENT ON TABLE auth_schema.verification_requests IS 'Stores OTP codes and verification requests for user account activation';
+COMMENT ON COLUMN auth_schema.verification_requests.user_id IS 'Reference to the user account being verified';
+COMMENT ON COLUMN auth_schema.verification_requests.otp_code IS '6-digit OTP code for verification';
+COMMENT ON COLUMN auth_schema.verification_requests.status IS 'Current status: PENDING, VERIFIED, REJECTED, EXPIRED';
+COMMENT ON COLUMN auth_schema.verification_requests.verification_method IS 'Method used: OTP (user), MANUAL (admin), AUTO (system)';
+COMMENT ON COLUMN auth_schema.verification_requests.verified_by IS 'Admin user ID who verified the account (if manual)';
+COMMENT ON COLUMN auth_schema.verification_requests.expires_at IS 'When the OTP expires (typically 5 minutes)';
+
+-- OTP Codes Table (dedicated table for OTP storage)
+CREATE TABLE auth_schema.otp_codes (
+    id BIGSERIAL PRIMARY KEY,
+    phone_number VARCHAR(20) NOT NULL,
+    otp_code VARCHAR(6) NOT NULL,
+    purpose VARCHAR(50) NOT NULL DEFAULT 'LOGIN_VERIFICATION',
+        CHECK (purpose IN ('LOGIN_VERIFICATION', 'REGISTRATION', 'PASSWORD_RESET', 'PHONE_VERIFICATION')),
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+        CHECK (status IN ('ACTIVE', 'USED', 'EXPIRED', 'INVALIDATED')),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    used_at TIMESTAMP,
+    attempts INT NOT NULL DEFAULT 0,
+    max_attempts INT NOT NULL DEFAULT 5,
+    metadata JSONB,
+    CONSTRAINT chk_expires_after_created CHECK (expires_at > created_at)
+);
+
+CREATE INDEX idx_otp_phone_purpose ON auth_schema.otp_codes(phone_number, purpose);
+CREATE INDEX idx_otp_status ON auth_schema.otp_codes(status);
+CREATE INDEX idx_otp_expires ON auth_schema.otp_codes(expires_at);
+CREATE INDEX idx_otp_created ON auth_schema.otp_codes(created_at DESC);
+
+COMMENT ON TABLE auth_schema.otp_codes IS 'Stores OTP codes for various purposes (login, registration, password reset)';
+COMMENT ON COLUMN auth_schema.otp_codes.phone_number IS 'Phone number the OTP was sent to';
+COMMENT ON COLUMN auth_schema.otp_codes.otp_code IS '6-digit OTP code';
+COMMENT ON COLUMN auth_schema.otp_codes.purpose IS 'Purpose of the OTP: LOGIN_VERIFICATION, REGISTRATION, PASSWORD_RESET, PHONE_VERIFICATION';
+COMMENT ON COLUMN auth_schema.otp_codes.status IS 'Status: ACTIVE (can be used), USED (already verified), EXPIRED (time expired), INVALIDATED (too many attempts)';
+COMMENT ON COLUMN auth_schema.otp_codes.expires_at IS 'When the OTP expires (typically 5 minutes from creation)';
+COMMENT ON COLUMN auth_schema.otp_codes.attempts IS 'Number of verification attempts made';
+COMMENT ON COLUMN auth_schema.otp_codes.max_attempts IS 'Maximum allowed verification attempts (default: 5)';
+
+-- Function to automatically mark expired OTPs
+CREATE OR REPLACE FUNCTION auth_schema.mark_expired_otps()
+RETURNS void AS $$
+BEGIN
+    UPDATE auth_schema.otp_codes
+    SET status = 'EXPIRED'
+    WHERE status = 'ACTIVE'
+      AND expires_at < CURRENT_TIMESTAMP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to get active OTP for phone and purpose
+CREATE OR REPLACE FUNCTION auth_schema.get_active_otp(
+    p_phone_number VARCHAR(20),
+    p_purpose VARCHAR(50)
+)
+RETURNS TABLE (
+    id BIGINT,
+    otp_code VARCHAR(6),
+    expires_at TIMESTAMP,
+    attempts INT,
+    max_attempts INT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        oc.id,
+        oc.otp_code,
+        oc.expires_at,
+        oc.attempts,
+        oc.max_attempts
+    FROM auth_schema.otp_codes oc
+    WHERE oc.phone_number = p_phone_number
+      AND oc.purpose = p_purpose
+      AND oc.status = 'ACTIVE'
+      AND oc.expires_at > CURRENT_TIMESTAMP
+    ORDER BY oc.created_at DESC
+    LIMIT 1;
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION auth_schema.get_active_otp IS 'Returns the most recent active OTP for a phone number and purpose';
 
 -- =============================================
 -- USER SCHEMA - User Profiles & Preferences
@@ -305,14 +399,35 @@ CREATE INDEX idx_merchant_docs_merchant ON merchant_schema.merchant_documents(me
 -- VOUCHER SCHEMA - Voucher Management
 -- =============================================
 
+-- Voucher Categories
+CREATE TABLE voucher_schema.voucher_categories (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    display_name VARCHAR(255) NOT NULL,
+    slug VARCHAR(100) UNIQUE,
+    description TEXT,
+    icon VARCHAR(100),
+    color VARCHAR(20),
+    sort_order INT DEFAULT 0,
+    display_order INT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_voucher_categories_active ON voucher_schema.voucher_categories(is_active);
+CREATE INDEX idx_voucher_categories_name ON voucher_schema.voucher_categories(name);
+CREATE INDEX idx_voucher_categories_slug ON voucher_schema.voucher_categories(slug);
+
+COMMENT ON TABLE voucher_schema.voucher_categories IS 'Voucher categories (Food, Spa, Entertainment, etc.)';
+
 CREATE TABLE voucher_schema.vouchers (
     id BIGSERIAL PRIMARY KEY,
     merchant_id BIGINT NOT NULL,  -- Links to merchant_schema.merchants(id)
-    category_id BIGINT,  -- Links to shared_schema.voucher_categories(id)
+    category_id BIGINT,  -- Links to voucher_schema.voucher_categories(id)
     title VARCHAR(255) NOT NULL,
     description TEXT,
     terms_conditions TEXT,
-    image_url VARCHAR(500),
+    image_url TEXT,
     min_value DECIMAL(10,2) NOT NULL,
     max_value DECIMAL(10,2) NOT NULL,
     validity_months INT NOT NULL DEFAULT 12,
@@ -680,7 +795,7 @@ COMMENT ON TABLE admin_schema.audit_logs IS 'System audit trail (owned by admin-
 -- FILE UPLOADS (Shared)
 -- =============================================
 
-CREATE TABLE shared_schema.file_uploads (
+CREATE TABLE system_schema.file_uploads (
     id BIGSERIAL PRIMARY KEY,
     file_name VARCHAR(255) NOT NULL,
     file_url VARCHAR(500) NOT NULL,
@@ -692,15 +807,15 @@ CREATE TABLE shared_schema.file_uploads (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_uploads_uploader ON shared_schema.file_uploads(uploader_id);
-CREATE INDEX idx_uploads_entity ON shared_schema.file_uploads(entity_type, entity_id);
+CREATE INDEX idx_uploads_uploader ON system_schema.file_uploads(uploader_id);
+CREATE INDEX idx_uploads_entity ON system_schema.file_uploads(entity_type, entity_id);
 
 -- =============================================
 -- INSERT SEED DATA
 -- =============================================
 
 -- Voucher Categories
-INSERT INTO shared_schema.voucher_categories (name, display_name, icon, color, sort_order) VALUES
+INSERT INTO voucher_schema.voucher_categories (name, display_name, icon, color, sort_order) VALUES
 ('food-beverage', 'Food & Beverage', '🍽️', '#FF5722', 1),
 ('spa-wellness', 'Spa & Wellness', '💆', '#9C27B0', 2),
 ('entertainment', 'Entertainment', '🎭', '#2196F3', 3),
@@ -709,7 +824,7 @@ INSERT INTO shared_schema.voucher_categories (name, display_name, icon, color, s
 ('services', 'Services', '🔧', '#607D8B', 6);
 
 -- System Settings
-INSERT INTO shared_schema.system_settings (key, value, value_type, description, is_public) VALUES
+INSERT INTO system_schema.system_settings (key, value, value_type, description, is_public) VALUES
 ('platform.commission_rate', '0.08', 'DECIMAL', 'Platform commission rate (8%)', FALSE),
 ('platform.currency', 'USD', 'STRING', 'Default platform currency', TRUE),
 ('platform.timezone', 'Asia/Phnom_Penh', 'STRING', 'Platform timezone', TRUE);
@@ -788,7 +903,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA notification_schema GRANT ALL ON TABLES TO ka
 ALTER DEFAULT PRIVILEGES IN SCHEMA payout_schema GRANT ALL ON TABLES TO kado24_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA analytics_schema GRANT ALL ON TABLES TO kado24_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA admin_schema GRANT ALL ON TABLES TO kado24_user;
-ALTER DEFAULT PRIVILEGES IN SCHEMA shared_schema GRANT ALL ON TABLES TO kado24_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA system_schema GRANT ALL ON TABLES TO kado24_user;
 
 -- Grant permissions on future sequences
 ALTER DEFAULT PRIVILEGES IN SCHEMA auth_schema GRANT ALL ON SEQUENCES TO kado24_user;
@@ -802,7 +917,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA notification_schema GRANT ALL ON SEQUENCES TO
 ALTER DEFAULT PRIVILEGES IN SCHEMA payout_schema GRANT ALL ON SEQUENCES TO kado24_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA analytics_schema GRANT ALL ON SEQUENCES TO kado24_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA admin_schema GRANT ALL ON SEQUENCES TO kado24_user;
-ALTER DEFAULT PRIVILEGES IN SCHEMA shared_schema GRANT ALL ON SEQUENCES TO kado24_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA system_schema GRANT ALL ON SEQUENCES TO kado24_user;
 
 -- =============================================
 -- COMPLETION MESSAGE

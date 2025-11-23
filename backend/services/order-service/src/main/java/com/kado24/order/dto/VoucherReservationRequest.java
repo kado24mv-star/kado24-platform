@@ -16,3 +16,22 @@ public class VoucherReservationRequest {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

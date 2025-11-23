@@ -11,6 +11,9 @@ import com.kado24.merchant.dto.RegisterMerchantRequest;
 import com.kado24.merchant.entity.Merchant;
 import com.kado24.merchant.mapper.MerchantMapper;
 import com.kado24.merchant.repository.MerchantRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,6 +36,9 @@ public class MerchantService {
     private final MerchantMapper merchantMapper;
     private final EventPublisher eventPublisher;
     private final PayoutClient payoutClient;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     /**
      * Register merchant (creates merchant profile for existing user)
@@ -128,6 +134,23 @@ public class MerchantService {
 
         merchant.approve(adminId);
         merchant = merchantRepository.save(merchant);
+
+        // Update user status to ACTIVE in auth_schema.users
+        try {
+            Query updateUserQuery = entityManager.createNativeQuery(
+                "UPDATE auth_schema.users SET status = 'ACTIVE' WHERE id = :userId AND status = 'PENDING_VERIFICATION'"
+            );
+            updateUserQuery.setParameter("userId", merchant.getUserId());
+            int updatedRows = updateUserQuery.executeUpdate();
+            if (updatedRows > 0) {
+                log.info("Updated user status to ACTIVE for user ID: {}", merchant.getUserId());
+            } else {
+                log.warn("User status not updated for user ID: {} (may already be ACTIVE or not found)", merchant.getUserId());
+            }
+        } catch (Exception e) {
+            log.error("Failed to update user status to ACTIVE for user ID: {}", merchant.getUserId(), e);
+            // Don't fail the approval if user status update fails, but log the error
+        }
 
         // Send approval notification
         publishMerchantApprovedNotification(merchant);

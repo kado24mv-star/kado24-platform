@@ -204,7 +204,7 @@ create_route "1" '{
   "upstream_id": "auth-service-upstream",
   "plugins": {
     "cors": {
-      "allow_origins": "http://localhost:4200",
+      "allow_origins": "http://localhost:4200,http://localhost:8001,http://localhost:8002",
       "allow_methods": "GET,POST,PUT,DELETE,OPTIONS",
       "allow_headers": "Authorization,Content-Type,Accept",
       "expose_headers": "Authorization,Content-Type,Accept",
@@ -222,17 +222,13 @@ create_route "1" '{
   }
 }'
 
-# 2. User Service Routes (Protected)
+# 2. User Service Routes (Protected) - Backend handles JWT validation
 create_route "2" '{
   "name": "user-service-route",
   "uri": "/api/v1/users/*",
-  "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   "upstream_id": "user-service-upstream",
   "plugins": {
-    "jwt-auth": {
-      "header": "Authorization",
-      "query": "token"
-    },
     "cors": {},
     "limit-count": {
       "count": 100,
@@ -248,7 +244,7 @@ create_route "2" '{
 create_route "3" '{
   "name": "voucher-service-public-read",
   "uri": "/api/v1/vouchers",
-  "methods": ["GET"],
+  "methods": ["GET", "OPTIONS"],
   "upstream_id": "voucher-service-upstream",
   "plugins": {
     "cors": {},
@@ -274,7 +270,7 @@ create_route "3" '{
 create_route "4" '{
   "name": "voucher-service-single",
   "uri": "/api/v1/vouchers/*",
-  "methods": ["GET"],
+  "methods": ["GET", "OPTIONS"],
   "upstream_id": "voucher-service-upstream",
   "plugins": {
     "cors": {},
@@ -295,7 +291,7 @@ create_route "4" '{
 create_route "5" '{
   "name": "voucher-service-protected-write",
   "uri": "/api/v1/vouchers/*",
-  "methods": ["POST", "PUT", "DELETE", "PATCH"],
+  "methods": ["POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   "upstream_id": "voucher-service-upstream",
   "plugins": {
     "jwt-auth": {},
@@ -308,7 +304,7 @@ create_route "5" '{
 create_route "6" '{
   "name": "order-service-route",
   "uri": "/api/v1/orders/*",
-  "methods": ["GET", "POST", "PUT", "DELETE"],
+  "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   "upstream_id": "order-service-upstream",
   "plugins": {
     "jwt-auth": {},
@@ -325,7 +321,7 @@ create_route "6" '{
 create_route "7" '{
   "name": "payment-service-route",
   "uri": "/api/v1/payments/*",
-  "methods": ["GET", "POST"],
+  "methods": ["GET", "POST", "OPTIONS"],
   "upstream_id": "payment-service-upstream",
   "plugins": {
     "jwt-auth": {},
@@ -343,7 +339,7 @@ create_route "7" '{
 create_route "8" '{
   "name": "payment-callbacks",
   "uri": "/api/v1/payments/callbacks/*",
-  "methods": ["GET", "POST"],
+  "methods": ["GET", "POST", "OPTIONS"],
   "upstream_id": "payment-service-upstream",
   "plugins": {
     "cors": {},
@@ -360,7 +356,7 @@ create_route "8" '{
 create_route "9" '{
   "name": "wallet-service-route",
   "uri": "/api/v1/wallet/*",
-  "methods": ["GET", "POST", "PUT", "DELETE"],
+  "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   "upstream_id": "wallet-service-upstream",
   "plugins": {
     "jwt-auth": {},
@@ -391,7 +387,7 @@ create_route "10" '{
 create_route "11" '{
   "name": "merchant-service-route",
   "uri": "/api/v1/merchants/*",
-  "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   "upstream_id": "merchant-service-upstream",
   "plugins": {
     "jwt-auth": {},
@@ -404,7 +400,7 @@ create_route "11" '{
 create_route "12" '{
   "name": "admin-portal-backend-route",
   "uri": "/api/admin/*",
-  "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   "upstream_id": "admin-portal-backend-upstream",
   "plugins": {
     "jwt-auth": {},
@@ -432,7 +428,7 @@ create_route "13" '{
 create_route "14" '{
   "name": "notification-service-route",
   "uri": "/api/v1/notifications/*",
-  "methods": ["GET","POST","PUT","DELETE","PATCH"],
+  "methods": ["GET","POST","PUT","DELETE","PATCH","OPTIONS"],
   "upstream_id": "notification-service-upstream",
   "plugins": {
     "jwt-auth": {},
@@ -445,7 +441,7 @@ create_route "14" '{
 create_route "15" '{
   "name": "payout-service-route",
   "uri": "/api/v1/payouts/*",
-  "methods": ["GET","POST","PUT","DELETE","PATCH"],
+  "methods": ["GET","POST","PUT","DELETE","PATCH","OPTIONS"],
   "upstream_id": "payout-service-upstream",
   "plugins": {
     "jwt-auth": {},
@@ -458,7 +454,7 @@ create_route "15" '{
 create_route "16" '{
   "name": "analytics-service-route",
   "uri": "/api/v1/analytics/*",
-  "methods": ["GET","POST"],
+  "methods": ["GET","POST","OPTIONS"],
   "upstream_id": "analytics-service-upstream",
   "plugins": {
     "jwt-auth": {},

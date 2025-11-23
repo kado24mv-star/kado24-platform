@@ -30,3 +30,22 @@ public class AnalyticsServiceApplication {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

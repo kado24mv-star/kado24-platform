@@ -80,7 +80,59 @@ class OrderService {
       throw Exception('Order cancellation failed');
     }
   }
+
+  // Complete Payment
+  Future<Map<String, dynamic>> completePayment({
+    required String token,
+    required int orderId,
+    required double amount,
+    required String paymentMethod,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.orderServiceUrl}/api/v1/payments'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'orderId': orderId,
+        'amount': amount,
+        'paymentMethod': paymentMethod,
+      }),
+    );
+
+    print('OrderService: Payment completion response status: ${response.statusCode}');
+    print('OrderService: Response body: ${response.body}');
+    
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      print('OrderService: Payment completion successful: ${responseData.toString()}');
+      return responseData;
+    } else {
+      final errorBody = response.body;
+      print('OrderService: Payment completion failed with status ${response.statusCode}: $errorBody');
+      throw Exception('Payment completion failed: $errorBody');
+    }
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

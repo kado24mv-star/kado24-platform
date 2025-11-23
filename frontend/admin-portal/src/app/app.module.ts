@@ -18,12 +18,16 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 // Components
 import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login/login.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { MerchantApprovalComponent } from './components/merchants/merchant-approval/merchant-approval.component';
+import { MerchantApprovalComponent, ConfirmDialogComponent, RejectDialogComponent, MerchantDetailsDialogComponent } from './components/merchants/merchant-approval/merchant-approval.component';
+import { UserVerificationComponent, UserDetailsDialogComponent, ConfirmUserVerificationDialogComponent, RejectUserVerificationDialogComponent } from './components/users/user-verification/user-verification.component';
 import { TransactionMonitorComponent } from './components/transactions/transaction-monitor/transaction-monitor.component';
 
 // Services
@@ -34,7 +38,7 @@ import { AuthService } from './services/auth.service';
 import { AuthGuard } from './guards/auth.guard';
 
 // Interceptors
-import { JwtInterceptor } from './interceptors/jwt.interceptor';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -45,6 +49,7 @@ const routes: Routes = [
       { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'merchants/pending', component: MerchantApprovalComponent },
+      { path: 'users/pending', component: UserVerificationComponent },
       { path: 'transactions', component: TransactionMonitorComponent },
     ]
   },
@@ -57,6 +62,13 @@ const routes: Routes = [
     LoginComponent,
     DashboardComponent,
     MerchantApprovalComponent,
+    ConfirmDialogComponent,
+    RejectDialogComponent,
+    MerchantDetailsDialogComponent,
+    UserVerificationComponent,
+    UserDetailsDialogComponent,
+    ConfirmUserVerificationDialogComponent,
+    RejectUserVerificationDialogComponent,
     TransactionMonitorComponent,
   ],
   imports: [
@@ -80,6 +92,9 @@ const routes: Routes = [
     MatSidenavModule,
     MatListModule,
     MatChipsModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    MatPaginatorModule,
   ],
   providers: [
     ApiService,
@@ -87,13 +102,17 @@ const routes: Routes = [
     AuthGuard,
     {
       provide: HTTP_INTERCEPTORS,
-      useClass: JwtInterceptor,
+      useClass: AuthInterceptor,
       multi: true
     }
   ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+
+
+
+
 
 
 

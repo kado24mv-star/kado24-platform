@@ -40,6 +40,14 @@ logging:
   level:
     com.kado24: DEBUG
 
+services:
+  order:
+    base-url: ${SERVICES_ORDER_BASE_URL:http://kado24-order-service:8084}
+  user:
+    base-url: ${SERVICES_USER_BASE_URL:http://kado24-user-service:8082}
+  merchant:
+    base-url: ${SERVICES_MERCHANT_BASE_URL:http://kado24-merchant-service:8088}
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html

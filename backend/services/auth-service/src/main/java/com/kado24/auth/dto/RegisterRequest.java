@@ -1,6 +1,8 @@
 package com.kado24.auth.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.kado24.auth.entity.User.UserRole;
+import com.kado24.common.util.PhoneNumberDeserializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -24,8 +26,9 @@ public class RegisterRequest {
     private String fullName;
 
     @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "^\\+855\\d{8,9}$", message = "Phone number must be in format +855XXXXXXXX")
-    @Schema(description = "Phone number in Cambodia format", example = "+85512345678")
+    @Pattern(regexp = "^\\+855\\d{8,9}$", message = "Phone number must be in format 0XXXXXXXX or +855XXXXXXXX")
+    @JsonDeserialize(using = PhoneNumberDeserializer.class)
+    @Schema(description = "Phone number in Cambodia format (0XXXXXXXX or +855XXXXXXXX)", example = "012345678 or +85512345678")
     private String phoneNumber;
 
     @Email(message = "Email must be valid")
@@ -46,6 +49,15 @@ public class RegisterRequest {
     @Schema(description = "User role", example = "CONSUMER")
     private UserRole role;
 }
+
+
+
+
+
+
+
+
+
 
 
 

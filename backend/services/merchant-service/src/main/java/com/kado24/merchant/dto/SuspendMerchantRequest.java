@@ -13,3 +13,22 @@ public class SuspendMerchantRequest {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

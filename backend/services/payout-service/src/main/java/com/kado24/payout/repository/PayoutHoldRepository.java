@@ -17,3 +17,22 @@ public interface PayoutHoldRepository extends JpaRepository<PayoutHold, Long> {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

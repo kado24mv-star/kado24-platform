@@ -32,3 +32,22 @@ public interface RedemptionRepository extends JpaRepository<Redemption, Long> {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -2,12 +2,15 @@ package com.kado24.auth.service;
 
 import com.kado24.auth.dto.*;
 import com.kado24.auth.entity.User;
+import com.kado24.auth.entity.VerificationRequest;
 import com.kado24.auth.mapper.UserMapper;
 import com.kado24.auth.repository.UserRepository;
+import com.kado24.auth.repository.VerificationRequestRepository;
 import com.kado24.common.exception.ConflictException;
 import com.kado24.common.exception.ResourceNotFoundException;
 import com.kado24.common.exception.UnauthorizedException;
 import com.kado24.common.exception.ValidationException;
+import com.kado24.common.util.PhoneNumberUtil;
 import com.kado24.common.util.StringUtil;
 import com.kado24.kafka.event.AnalyticsEvent;
 import com.kado24.kafka.event.AuditEvent;
@@ -21,8 +24,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Authentication Service
@@ -39,6 +44,8 @@ public class AuthService {
     private final OtpService otpService;
     private final EventPublisher eventPublisher;
     private final UserMapper userMapper;
+    private final VerificationRequestService verificationRequestService;
+    private final VerificationRequestRepository verificationRequestRepository;
 
     @Value("${jwt.expiration:86400000}")
     private long jwtExpirationMs;
@@ -50,19 +57,21 @@ public class AuthService {
     public TokenResponse register(RegisterRequest request) {
         log.info("Processing registration for phone: {}", request.getPhoneNumber());
 
-        // Check if phone number already exists
-        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
-            throw new ConflictException("Phone number already registered");
+        // Check if phone number already exists with the same role
+        // Allow same phone number for different roles (e.g., CONSUMER and MERCHANT)
+        if (userRepository.existsByPhoneNumberAndRole(request.getPhoneNumber(), request.getRole())) {
+            throw new ConflictException("Phone number already registered with this role. Please try logging in instead.");
         }
 
-        // Check if email already exists (if provided)
+        // Check if email already exists with the same role (if provided)
         if (request.getEmail() != null && !request.getEmail().isEmpty()) {
-            if (userRepository.existsByEmail(request.getEmail())) {
-                throw new ConflictException("Email already registered");
+            if (userRepository.existsByEmailAndRole(request.getEmail(), request.getRole())) {
+                throw new ConflictException("Email already registered with this role. Please try logging in instead.");
             }
         }
 
-        // Create user entity
+        // Create user entity with PENDING_VERIFICATION status
+        // User will be activated after OTP verification
         User user = User.builder()
                 .fullName(request.getFullName())
                 .phoneNumber(request.getPhoneNumber())
@@ -77,25 +86,41 @@ public class AuthService {
         // Save to database
         user = userRepository.save(user);
         
-        log.info("User registered successfully with ID: {}", user.getId());
+        // Flush to ensure user is persisted in database before creating verification request
+        // This prevents foreign key constraint violation
+        userRepository.flush();
+        
+        log.info("User registered successfully with ID: {}, sending OTP for verification", user.getId());
+
+        // Generate and send OTP
+        OtpRequest otpRequest = OtpRequest.builder()
+                .phoneNumber(request.getPhoneNumber())
+                .purpose("REGISTRATION")
+                .build();
+        OtpResponse otpResponse = sendOtp(otpRequest);
+        
+        // Store OTP in database for admin support (Option 3)
+        if (otpResponse.getOtpCode() != null) {
+            verificationRequestService.createVerificationRequest(
+                    user.getId(),
+                    request.getPhoneNumber(),
+                    otpResponse.getOtpCode()
+            );
+            log.info("OTP stored in database for admin support");
+        }
+        
+        log.info("OTP sent to phone: {} for registration", request.getPhoneNumber());
 
         // Publish analytics event
         publishUserRegisteredEvent(user);
 
-        // Generate tokens
-        String accessToken = jwtTokenProvider.generateAccessToken(
-                user.getPhoneNumber(),
-                user.getRole().name(),
-                user.getId()
-        );
-        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getPhoneNumber());
-
-        // Build response
+        // Don't return tokens - user needs to verify OTP first
+        // Return user info without tokens
         return TokenResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .accessToken(null) // No token until OTP is verified
+                .refreshToken(null)
                 .tokenType("Bearer")
-                .expiresIn(jwtExpirationMs / 1000) // Convert to seconds
+                .expiresIn(0L)
                 .user(userMapper.toDTO(user))
                 .build();
     }
@@ -107,8 +132,15 @@ public class AuthService {
     public TokenResponse login(LoginRequest request) {
         log.info("Processing login for: {}", request.getIdentifier());
 
+        // Normalize identifier if it's a phone number
+        String identifier = request.getIdentifier();
+        if (PhoneNumberUtil.isValid(identifier)) {
+            identifier = PhoneNumberUtil.normalize(identifier);
+            log.debug("Normalized phone number: {}", identifier);
+        }
+
         // Find user by phone or email
-        User user = userRepository.findByPhoneNumberOrEmail(request.getIdentifier())
+        User user = userRepository.findByPhoneNumberOrEmail(identifier)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with provided credentials"));
 
         // Verify password
@@ -117,7 +149,58 @@ public class AuthService {
             throw new UnauthorizedException("Invalid credentials");
         }
 
-        // Check if user is active
+        // Check if user needs OTP verification (PENDING_VERIFICATION status)
+        // For consumers, allow self-verification via OTP (no admin required)
+        if (user.getStatus() == User.UserStatus.PENDING_VERIFICATION) {
+            log.info("User {} needs OTP verification for self-verification, sending OTP", user.getPhoneNumber());
+            
+            // Send OTP for verification
+            OtpRequest otpRequest = OtpRequest.builder()
+                    .phoneNumber(user.getPhoneNumber())
+                    .purpose("LOGIN_VERIFICATION")
+                    .build();
+            OtpResponse otpResponse = sendOtp(otpRequest);
+            
+            // Store OTP in database for admin support (optional)
+            log.info("Checking OTP response - OTP code is null: {}, response: {}", 
+                    otpResponse.getOtpCode() == null, otpResponse);
+            if (otpResponse.getOtpCode() != null) {
+                log.info("OTP code received: {}, storing in database for user {}", 
+                        otpResponse.getOtpCode(), user.getId());
+                // Check if there's an existing pending verification request
+                Optional<VerificationRequest> existing = verificationRequestService.getByUserId(user.getId());
+                if (existing.isEmpty() || existing.get().getStatus() != VerificationRequest.VerificationStatus.PENDING) {
+                    VerificationRequest created = verificationRequestService.createVerificationRequest(
+                            user.getId(),
+                            user.getPhoneNumber(),
+                            otpResponse.getOtpCode()
+                    );
+                    log.info("Created verification request with ID: {} for user {}", created.getId(), user.getId());
+                } else {
+                    // Update existing request with new OTP - invalidate old and create new
+                    VerificationRequest existingReq = existing.get();
+                    existingReq.setStatus(VerificationRequest.VerificationStatus.EXPIRED);
+                    verificationRequestRepository.save(existingReq);
+                    // Create new verification request with updated OTP
+                    VerificationRequest created = verificationRequestService.createVerificationRequest(
+                            user.getId(),
+                            user.getPhoneNumber(),
+                            otpResponse.getOtpCode()
+                    );
+                    log.info("Updated verification request, created new one with ID: {} for user {}", 
+                            created.getId(), user.getId());
+                }
+            } else {
+                log.warn("OTP code is null in response, cannot store in database for user {}", user.getId());
+            }
+            
+            // Throw special exception to indicate OTP verification is required
+            // Frontend will catch this and navigate to OTP screen
+            throw new UnauthorizedException("OTP_VERIFICATION_REQUIRED: Account pending verification. OTP sent to " + 
+                    StringUtil.maskPhoneNumber(user.getPhoneNumber()));
+        }
+
+        // Check if user is active (other statuses like SUSPENDED, DELETED)
         if (user.getStatus() != User.UserStatus.ACTIVE) {
             throw new UnauthorizedException("Account is not active. Status: " + user.getStatus());
         }
@@ -218,18 +301,17 @@ public class AuthService {
         
         log.info("OTP sent successfully to: {}", request.getPhoneNumber());
 
-        // Build response
+        // Build response (include OTP code for development/admin support)
+        // Always include OTP code so it can be stored in database for admin support
         OtpResponse response = OtpResponse.builder()
                 .message("OTP sent successfully")
                 .phoneNumber(StringUtil.maskPhoneNumber(request.getPhoneNumber()))
                 .expiresIn(300) // 5 minutes
+                .otpCode(otp) // Always include OTP code for admin support
                 .build();
 
-        // In development mode, include OTP in response
-        if (isDevelopmentMode()) {
-            response.setOtpCode(otp);
-            log.debug("DEV MODE: OTP code is {}", otp);
-        }
+        log.info("OTP generated: {} for phone: {}, included in response: {}", 
+                otp, request.getPhoneNumber(), response.getOtpCode() != null);
 
         return response;
     }
@@ -239,27 +321,35 @@ public class AuthService {
      */
     @Transactional
     public TokenResponse verifyOtp(VerifyOtpRequest request) {
-        log.info("Verifying OTP for phone: {}", request.getPhoneNumber());
+        log.info("Verifying OTP for phone: {}, purpose: {}", request.getPhoneNumber(), request.getPurpose());
+
+        // Determine OTP purpose (default to LOGIN if not provided)
+        String purpose = (request.getPurpose() != null && !request.getPurpose().isEmpty()) 
+                ? request.getPurpose() 
+                : "LOGIN";
 
         // Verify OTP
         boolean isValid = otpService.verifyOtp(
                 request.getPhoneNumber(),
                 request.getOtpCode(),
-                "LOGIN"
+                purpose
         );
 
         if (!isValid) {
             throw new ValidationException("Invalid OTP code");
         }
 
-        // Find or create user
+        // Find user
         User user = userRepository.findByPhoneNumber(request.getPhoneNumber())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Mark phone as verified
+        // Mark phone as verified and activate account if pending verification
         user.verifyPhone();
         user.updateLastLogin();
         userRepository.save(user);
+
+        log.info("OTP verified successfully for phone: {}, user activated: {}", 
+                request.getPhoneNumber(), user.getStatus() == User.UserStatus.ACTIVE);
 
         // Generate tokens
         String accessToken = jwtTokenProvider.generateAccessToken(
@@ -284,8 +374,15 @@ public class AuthService {
     public void forgotPassword(ForgotPasswordRequest request) {
         log.info("Processing forgot password for: {}", request.getIdentifier());
 
+        // Normalize identifier if it's a phone number
+        String identifier = request.getIdentifier();
+        if (PhoneNumberUtil.isValid(identifier)) {
+            identifier = PhoneNumberUtil.normalize(identifier);
+            log.debug("Normalized phone number: {}", identifier);
+        }
+
         // Find user
-        User user = userRepository.findByPhoneNumberOrEmail(request.getIdentifier())
+        User user = userRepository.findByPhoneNumberOrEmail(identifier)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // Generate and send OTP
@@ -386,6 +483,14 @@ public class AuthService {
         }
     }
 }
+
+
+
+
+
+
+
+
 
 
 

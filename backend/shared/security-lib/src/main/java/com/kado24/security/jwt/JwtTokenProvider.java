@@ -49,6 +49,7 @@ public class JwtTokenProvider {
                 .subject(username)
                 .claim("roles", roles)
                 .claim("type", "access")
+                .claim("key", "wallet-service-key") // Required by APISIX jwt-auth plugin
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
@@ -67,6 +68,7 @@ public class JwtTokenProvider {
                 .claim("roles", role)
                 .claim("userId", userId)
                 .claim("type", "access")
+                .claim("key", "wallet-service-key") // Required by APISIX jwt-auth plugin
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
@@ -106,13 +108,34 @@ public class JwtTokenProvider {
      * Get user ID from JWT token
      */
     public Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-        
-        return claims.get("userId", Long.class);
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            
+            Object userIdObj = claims.get("userId");
+            
+            if (userIdObj == null) {
+                log.warn("JWT token missing userId claim. Available claims: {}", claims.keySet());
+                return null;
+            }
+            
+            if (userIdObj instanceof Long) {
+                return (Long) userIdObj;
+            } else if (userIdObj instanceof Integer) {
+                return ((Integer) userIdObj).longValue();
+            } else if (userIdObj instanceof Number) {
+                return ((Number) userIdObj).longValue();
+            } else {
+                log.warn("JWT token userId claim is not a number: {} (type: {})", userIdObj, userIdObj.getClass());
+                return null;
+            }
+        } catch (Exception e) {
+            log.error("Error extracting userId from token: {}", e.getMessage(), e);
+            return null;
+        }
     }
 
     /**
@@ -193,6 +216,20 @@ public class JwtTokenProvider {
                 .getPayload();
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

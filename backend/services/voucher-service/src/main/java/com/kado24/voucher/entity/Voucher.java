@@ -21,7 +21,7 @@ import java.util.List;
  * Voucher entity
  */
 @Entity
-@Table(name = "vouchers", indexes = {
+@Table(name = "vouchers", schema = "voucher_schema", indexes = {
         @Index(name = "idx_vouchers_merchant", columnList = "merchantId"),
         @Index(name = "idx_vouchers_category", columnList = "categoryId"),
         @Index(name = "idx_vouchers_status", columnList = "status"),
@@ -64,13 +64,13 @@ public class Voucher {
     @Column(name = "discount_percentage", precision = 5, scale = 2)
     private BigDecimal discountPercentage;
 
-    @Column(name = "image_url", length = 500)
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
     @Type(value = ListArrayType.class, parameters = {
             @Parameter(name = ListArrayType.SQL_ARRAY_TYPE, value = "text")
     })
-    @Column(name = "additional_images", columnDefinition = "text[]", nullable = true)
+    @Column(name = "additional_image", columnDefinition = "text[]", nullable = true)
     private List<String> additionalImages;
 
     @Enumerated(EnumType.STRING)
@@ -96,6 +96,12 @@ public class Voucher {
     })
     @Column(name = "redemption_locations", columnDefinition = "text[]", nullable = true)
     private List<String> redemptionLocations;
+
+    @Column(name = "min_value", precision = 10, scale = 2, nullable = false)
+    private BigDecimal minValue;
+
+    @Column(name = "max_value", precision = 10, scale = 2, nullable = false)
+    private BigDecimal maxValue;
 
     @Column(name = "min_purchase_amount", precision = 10, scale = 2)
     private BigDecimal minPurchaseAmount;
@@ -133,11 +139,11 @@ public class Voucher {
     private String metaDescription;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "createdat", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updatedat", nullable = false)
     private LocalDateTime updatedAt;
 
     @Column(name = "published_at")

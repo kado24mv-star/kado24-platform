@@ -96,3 +96,22 @@ public class RegisterMerchantRequest {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

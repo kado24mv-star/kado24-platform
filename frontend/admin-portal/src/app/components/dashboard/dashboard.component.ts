@@ -47,6 +47,9 @@ interface DashboardStats {
         <button mat-raised-button color="primary" routerLink="/merchants/pending">
           Pending Merchants
         </button>
+        <button mat-raised-button color="primary" routerLink="/users/pending">
+          Pending Users
+        </button>
         <button mat-raised-button color="accent" routerLink="/transactions">
           View Transactions
         </button>

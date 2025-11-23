@@ -41,3 +41,22 @@ public interface WalletVoucherRepository extends JpaRepository<WalletVoucher, Lo
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
