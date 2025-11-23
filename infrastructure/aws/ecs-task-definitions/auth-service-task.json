@@ -1,0 +1,89 @@
+{
+  "family": "kado24-auth-service",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::577004485374:role/kado24-ecs-task-execution-role",
+  "taskRoleArn": "arn:aws:iam::577004485374:role/kado24-ecs-task-role",
+  "containerDefinitions": [
+    {
+      "name": "auth-service",
+      "image": "577004485374.dkr.ecr.REGION.amazonaws.com/kado24/auth-service:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8081,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "SPRING_PROFILES_ACTIVE",
+          "value": "prod"
+        },
+        {
+          "name": "SERVER_PORT",
+          "value": "8081"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "POSTGRES_HOST",
+          "valueFrom": "arn:aws:secretsmanager:REGION:577004485374:secret:kado24/database:host::"
+        },
+        {
+          "name": "POSTGRES_PORT",
+          "valueFrom": "arn:aws:secretsmanager:REGION:577004485374:secret:kado24/database:port::"
+        },
+        {
+          "name": "POSTGRES_DB",
+          "valueFrom": "arn:aws:secretsmanager:REGION:577004485374:secret:kado24/database:db::"
+        },
+        {
+          "name": "POSTGRES_USER",
+          "valueFrom": "arn:aws:secretsmanager:REGION:577004485374:secret:kado24/database:username::"
+        },
+        {
+          "name": "POSTGRES_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:REGION:577004485374:secret:kado24/database:password::"
+        },
+        {
+          "name": "REDIS_HOST",
+          "valueFrom": "arn:aws:secretsmanager:REGION:577004485374:secret:kado24/redis:host::"
+        },
+        {
+          "name": "REDIS_PORT",
+          "valueFrom": "arn:aws:secretsmanager:REGION:577004485374:secret:kado24/redis:port::"
+        },
+        {
+          "name": "REDIS_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:REGION:577004485374:secret:kado24/redis:password::"
+        },
+        {
+          "name": "JWT_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:REGION:577004485374:secret:kado24/jwt-secret:secret::"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/kado24-auth-service",
+          "awslogs-region": "REGION",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:8081/actuator/health || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    }
+  ]
+}
+

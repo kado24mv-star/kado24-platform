@@ -1,0 +1,36 @@
+# AWS Configuration
+aws_region = "us-east-1"
+environment = "staging"
+project_name = "kado24"
+
+# Database Configuration
+db_instance_class = "db.t3.medium"
+db_allocated_storage = 100
+db_password = "CHANGE_THIS_SECURE_PASSWORD"
+
+# Redis Configuration
+redis_node_type = "cache.t3.micro"
+redis_password = ""
+
+# ECS Configuration
+ecs_cpu = 512
+ecs_memory = 1024
+ecs_desired_count = 2
+
+# Security
+jwt_secret = "CHANGE_THIS_TO_A_STRONG_SECRET_KEY_MINIMUM_256_BITS"
+allowed_cidr_blocks = ["0.0.0.0/0"]
+
+# Domain (optional)
+domain_name = ""
+enable_cloudfront = false
+
+# Terraform Backend (uncomment and configure)
+# terraform {
+#   backend "s3" {
+#     bucket = "kado24-terraform-state"
+#     key    = "terraform.tfstate"
+#     region = "us-east-1"
+#   }
+# }
+

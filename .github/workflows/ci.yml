@@ -1,0 +1,153 @@
+name: CI - Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-backend:
+    name: Build Backend Services
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        service:
+          - auth-service
+          - user-service
+          - voucher-service
+          - order-service
+          - wallet-service
+          - redemption-service
+          - merchant-service
+          - admin-portal-backend
+          - notification-service
+          - payout-service
+          - analytics-service
+          - mock-payment-service
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Build shared libraries
+        run: |
+          cd backend/shared/common-lib && mvn clean install -DskipTests
+          cd ../security-lib && mvn clean install -DskipTests
+          cd ../kafka-lib && mvn clean install -DskipTests
+      
+      - name: Build ${{ matrix.service }}
+        run: |
+          cd backend/services/${{ matrix.service }}
+          mvn clean package -DskipTests
+      
+      - name: Run tests
+        run: |
+          cd backend/services/${{ matrix.service }}
+          mvn test
+        continue-on-error: true
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.service }}
+          path: backend/services/${{ matrix.service }}/target/surefire-reports/
+          retention-days: 7
+
+  build-frontend:
+    name: Build Frontend Applications
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        app:
+          - admin-portal
+          - consumer-app
+          - merchant-app
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js (for admin-portal)
+        if: matrix.app == 'admin-portal'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/admin-portal/package-lock.json
+      
+      - name: Setup Flutter (for Flutter apps)
+        if: matrix.app != 'admin-portal'
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+      
+      - name: Install dependencies (admin-portal)
+        if: matrix.app == 'admin-portal'
+        run: |
+          cd frontend/admin-portal
+          npm ci
+      
+      - name: Build admin-portal
+        if: matrix.app == 'admin-portal'
+        run: |
+          cd frontend/admin-portal
+          npm run build -- --configuration production
+      
+      - name: Install Flutter dependencies
+        if: matrix.app != 'admin-portal'
+        run: |
+          cd frontend/${{ matrix.app }}
+          flutter pub get
+      
+      - name: Build Flutter app
+        if: matrix.app != 'admin-portal'
+        run: |
+          cd frontend/${{ matrix.app }}
+          flutter build web --release
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.app }}
+          path: |
+            frontend/${{ matrix.app }}/dist
+            frontend/${{ matrix.app }}/build/web
+          retention-days: 1
+
+  lint-and-validate:
+    name: Lint and Validate
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Check YAML syntax
+        uses: karancode/yaml-validator@v0.1.0
+        with:
+          yaml_file_paths: |
+            docker-compose.services.yml
+            infrastructure/docker/docker-compose.yml
+      
+      - name: Validate Dockerfiles
+        run: |
+          find . -name "Dockerfile" -exec echo "Checking {}" \;
+          find . -name "Dockerfile" -exec hadolint {} \; || true
+

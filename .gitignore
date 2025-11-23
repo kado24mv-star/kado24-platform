@@ -88,3 +88,21 @@ Desktop.ini
 *.db
 *.sqlite
 *.sqlite3
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+*.tfvars
+!terraform.tfvars.example
+.terraform.tfstate.lock.info
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# AWS Configuration (optional - uncomment if you want to keep config.env private)
+# infrastructure/aws/config.env
