@@ -41,9 +41,11 @@ function Create-Route {
         cors = $CORS_CONFIG
     }
     
-    if ($Protected) {
-        $plugins.jwt_auth = @{}
-    }
+    # Note: OAuth2 token validation is configured separately using setup-oauth2-validation.ps1
+    # This script only sets up CORS. For OAuth2 validation, run setup-oauth2-validation.ps1
+    # if ($Protected) {
+    #     $plugins.jwt_auth = @{}
+    # }
     
     $routeConfig = @{
         name = $Name
