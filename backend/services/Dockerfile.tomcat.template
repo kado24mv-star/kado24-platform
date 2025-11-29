@@ -1,0 +1,28 @@
+# Tomcat-based Dockerfile for Spring Boot services
+# Note: For proper Tomcat deployment, package as WAR in pom.xml
+FROM tomcat:10-jre17
+
+# Remove default Tomcat webapps
+RUN rm -rf /usr/local/tomcat/webapps/*
+
+# Set working directory
+WORKDIR /usr/local/tomcat
+
+# Copy WAR file to Tomcat webapps (rename to ROOT.war for root context)
+# If packaging as JAR, uncomment the JAR deployment section below
+COPY target/*.war /usr/local/tomcat/webapps/ROOT.war
+
+# Alternative: If still using JAR with embedded Tomcat
+# COPY target/*.jar /app/app.jar
+# EXPOSE 8080
+# ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+
+# Expose Tomcat port (default 8080, configure per service)
+EXPOSE 8080
+
+# Tomcat will auto-deploy WAR files from webapps directory
+# No need for explicit ENTRYPOINT - Tomcat starts automatically
+
+# Optional: Configure Tomcat server.xml for custom port
+# You can mount a custom server.xml or use environment variables
+

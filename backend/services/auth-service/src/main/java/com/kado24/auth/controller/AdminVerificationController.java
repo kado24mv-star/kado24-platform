@@ -45,6 +45,18 @@ public class AdminVerificationController {
             HttpServletRequest request) {
 
         Long adminId = (Long) request.getAttribute("userId");
+        if (adminId == null) {
+            // Try to get from SecurityContext if not in request attribute
+            try {
+                org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null && auth.getPrincipal() instanceof org.springframework.security.oauth2.jwt.Jwt) {
+                    org.springframework.security.oauth2.jwt.Jwt jwt = (org.springframework.security.oauth2.jwt.Jwt) auth.getPrincipal();
+                    adminId = jwt.getClaim("userId");
+                }
+            } catch (Exception e) {
+                log.warn("Could not extract userId from SecurityContext: {}", e.getMessage());
+            }
+        }
         log.info("Admin {} fetching pending verifications", adminId);
 
         Page<VerificationRequest> verifications = verificationRequestService.getPendingVerifications(

@@ -8,10 +8,10 @@ Authentication and authorization service for the Kado24 platform.
 - Login with phone/email + password
 - OTP generation and verification
 - Password reset
-- JWT token generation
+- OAuth2 token generation
 - Token refresh
 - Token blacklisting (logout)
-- OAuth2 authorization server (future)
+- OAuth2 authorization server
 
 ## 🚀 Quick Start
 
@@ -74,7 +74,7 @@ API Documentation (OpenAPI):
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/v1/auth/logout` | Logout (requires JWT) |
+| POST | `/api/v1/auth/logout` | Logout (requires OAuth2 token) |
 
 ## 📝 Usage Examples
 
@@ -216,10 +216,10 @@ curl -X POST http://localhost:8081/api/v1/auth/reset-password \
 | `REDIS_PORT` | Redis port | 6379 |
 | `REDIS_PASSWORD` | Redis password | kado24_redis_pass |
 | `KAFKA_BOOTSTRAP_SERVERS` | Kafka servers | localhost:9092 |
-| `JWT_SECRET` | JWT secret key | (change in production!) |
+| `JWT_SECRET` | OAuth2 JWT secret key (deprecated, using RSA keys) | (not used with OAuth2) |
 | `JWT_EXPIRATION` | Token expiration (ms) | 86400000 (24h) |
 
-### JWT Secret
+### OAuth2 Configuration (JWT Secret deprecated)
 
 ⚠️ **Important**: Always use a strong secret key in production!
 
@@ -284,8 +284,8 @@ Use the provided cURL commands above or import the Postman collection.
                       │
                       ▼
               ┌───────────────────┐
-              │  JwtTokenProvider │
-              │  (Generate JWT)   │
+              │  OAuth2TokenService │
+              │  (Generate OAuth2)   │
               └───────────────────┘
                       │
                       ▼
@@ -415,14 +415,14 @@ auth-service/
 
 - OTP codes are returned in development mode for easy testing
 - In production, OTP should be sent via SMS gateway
-- JWT secret must be changed in production
+- OAuth2 uses RSA key pairs (auto-generated, no secret needed)
 - All passwords are hashed using BCrypt (strength 10)
 - Phone numbers must be in format: +855XXXXXXXX (Cambodia)
 
 ## 🔗 Dependencies
 
 - common-lib (DTOs, exceptions, utilities)
-- security-lib (JWT, password encoding)
+- security-lib (OAuth2, password encoding)
 - kafka-lib (event publishing)
 - Spring Boot 3.2+
 - PostgreSQL 17

@@ -19,9 +19,9 @@ spring:
     allow-bean-definition-overriding: true
   
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:${DB_HOST:localhost}}:${POSTGRES_PORT:${DB_PORT:5432}}/${POSTGRES_DB:${DB_NAME:kado24_db}}?currentSchema=auth_schema
-    username: ${POSTGRES_USER:${DB_USER:kado24_user}}
-    password: ${POSTGRES_PASSWORD:${DB_PASSWORD:kado24_pass}}
+    url: jdbc:postgresql://${POSTGRES_HOST:${DB_HOST:kado24-dev-db.cfcki64aaw44.ap-southeast-1.rds.amazonaws.com}}:${POSTGRES_PORT:${DB_PORT:5432}}/${POSTGRES_DB:${DB_NAME:postgres}}?currentSchema=auth_schema
+    username: ${POSTGRES_USER:${DB_USER:kado24_dev_user}}
+    password: ${POSTGRES_PASSWORD:${DB_PASSWORD:docTod-dyfvi0-nesbux}}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 3
@@ -74,12 +74,6 @@ spring:
   #     value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
   #     properties:
   #       spring.json.trusted.packages: "com.kado24.*"
-
-# JWT Configuration
-jwt:
-  secret: ${JWT_SECRET:kado24-secret-key-change-this-in-production-minimum-256-bits-required-for-security}
-  expiration: ${JWT_EXPIRATION:86400000}  # 24 hours in milliseconds
-  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # 7 days in milliseconds
 
 # OTP Configuration
 otp:

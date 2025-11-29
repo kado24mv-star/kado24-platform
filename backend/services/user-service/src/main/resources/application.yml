@@ -9,9 +9,9 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:${DB_HOST:localhost}}:${POSTGRES_PORT:${DB_PORT:5432}}/${POSTGRES_DB:${DB_NAME:kado24_db}}?currentSchema=user_schema
-    username: ${POSTGRES_USER:${DB_USER:kado24_user}}
-    password: ${POSTGRES_PASSWORD:${DB_PASSWORD:kado24_pass}}
+    url: jdbc:postgresql://${POSTGRES_HOST:${DB_HOST:kado24-dev-db.cfcki64aaw44.ap-southeast-1.rds.amazonaws.com}}:${POSTGRES_PORT:${DB_PORT:5432}}/${POSTGRES_DB:${DB_NAME:postgres}}?currentSchema=user_schema
+    username: ${POSTGRES_USER:${DB_USER:kado24_dev_user}}
+    password: ${POSTGRES_PASSWORD:${DB_PASSWORD:docTod-dyfvi0-nesbux}}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 3
@@ -39,9 +39,14 @@ spring:
   #     acks: 1
   #     retries: 3
 
-# JWT Configuration (for validation only)
-jwt:
-  secret: ${JWT_SECRET:kado24-secret-key-change-this-in-production-minimum-256-bits-required-for-security}
+# OAuth2 Resource Server Configuration
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081
+          jwk-set-uri: http://localhost:8081/oauth2/jwks
 
 # Actuator
 management:

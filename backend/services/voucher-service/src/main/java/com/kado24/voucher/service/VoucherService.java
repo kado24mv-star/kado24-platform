@@ -19,6 +19,7 @@ import com.kado24.voucher.repository.VoucherRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -51,7 +52,49 @@ public class VoucherService {
      */
     @Transactional
     public VoucherDTO createVoucher(Long merchantId, CreateVoucherRequest request) {
-        log.info("Creating voucher for merchant: {}", merchantId);
+        // CRITICAL SAFETY CHECK: Never allow userId to be used as merchantId
+        // This is a final safeguard against the bug where userId gets inserted instead of merchantId
+        if (merchantId == null) {
+            log.error("CRITICAL: merchantId is null in createVoucher!");
+            throw new BusinessException("Merchant ID cannot be null");
+        }
+        
+        // Verify merchantId is actually a valid merchant ID (not a userId)
+        // Check if merchantId exists in merchants table and is not equal to any user_id
+        try {
+            String verifyMerchantSql = "SELECT COUNT(*) FROM merchant_schema.merchants WHERE id = :merchantId";
+            Query verifyQuery = entityManager.createNativeQuery(verifyMerchantSql);
+            verifyQuery.setParameter("merchantId", merchantId);
+            Object countResult = verifyQuery.getSingleResult();
+            long count = ((Number) countResult).longValue();
+            
+            if (count == 0) {
+                log.error("CRITICAL: merchantId {} does not exist in merchants table!", merchantId);
+                throw new BusinessException("Invalid merchant ID: " + merchantId);
+            }
+            
+            // Additional check: Ensure merchantId is not accidentally a userId
+            // Get the user_id for this merchant
+            String getUserSql = "SELECT user_id FROM merchant_schema.merchants WHERE id = :merchantId";
+            Query userQuery = entityManager.createNativeQuery(getUserSql);
+            userQuery.setParameter("merchantId", merchantId);
+            Object userIdResult = userQuery.getSingleResult();
+            Long actualUserId = ((Number) userIdResult).longValue();
+            
+            // If merchantId equals its own user_id, this is a data integrity issue
+            if (merchantId.equals(actualUserId)) {
+                log.error("CRITICAL DATA INTEGRITY ISSUE: Merchant ID {} equals its user_id {}!", merchantId, actualUserId);
+                log.error("This indicates corrupted data. Voucher creation blocked to prevent wrong merchant_id insertion.");
+                throw new BusinessException("Data integrity error: Merchant ID cannot equal user ID. Please contact support.");
+            }
+            
+            log.info("Creating voucher for merchant: {} (verified - user_id: {})", merchantId, actualUserId);
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error verifying merchant ID {}: {}", merchantId, e.getMessage(), e);
+            throw new BusinessException("Failed to verify merchant ID: " + e.getMessage());
+        }
 
         // Verify category exists
         VoucherCategory category = categoryRepository.findById(request.getCategoryId())
@@ -188,18 +231,76 @@ public class VoucherService {
      */
     /**
      * Get merchant ID from user ID
+     * Returns the merchant.id (not user_id) for the given user_id
+     * 
+     * IMPORTANT: This method MUST return merchant.id, NOT user_id.
+     * The merchant.id is what gets stored in vouchers.merchant_id column.
      */
     public Long getMerchantIdByUserId(Long userId) {
         try {
-            String sql = "SELECT id FROM merchant_schema.merchants WHERE user_id = :userId";
-            Object result = entityManager.createNativeQuery(sql)
-                    .setParameter("userId", userId)
-                    .getSingleResult();
+            // Use explicit column selection with table alias to ensure we get merchant.id, not user_id
+            // The query explicitly selects m.id (merchant.id) which is the primary key
+            String sql = "SELECT m.id AS merchant_id FROM merchant_schema.merchants m WHERE m.user_id = :userId LIMIT 1";
+            Query query = entityManager.createNativeQuery(sql);
+            query.setParameter("userId", userId);
+            Object result = query.getSingleResult();
             
-            if (result instanceof Number) {
-                return ((Number) result).longValue();
+            if (result == null) {
+                log.warn("Query returned null for user ID: {}", userId);
+                return null;
             }
-            return null;
+            
+            Long merchantId;
+            if (result instanceof Number) {
+                merchantId = ((Number) result).longValue();
+            } else {
+                log.error("Query returned non-numeric result type: {} for user ID: {}", result.getClass().getName(), userId);
+                return null;
+            }
+            
+            log.debug("Found merchant ID: {} for user ID: {}", merchantId, userId);
+            
+            // CRITICAL VALIDATION: Ensure merchantId is NOT the same as userId
+            // This prevents the bug where userId gets inserted instead of merchantId
+            if (merchantId.equals(userId)) {
+                log.error("CRITICAL ERROR: Merchant ID equals User ID! This indicates a data issue. merchantId={}, userId={}", merchantId, userId);
+                // Double-check by querying the merchant record to see what user_id it has
+                String validationSql = "SELECT m.user_id FROM merchant_schema.merchants m WHERE m.id = :merchantId";
+                try {
+                    Query validationQuery = entityManager.createNativeQuery(validationSql);
+                    validationQuery.setParameter("merchantId", merchantId);
+                    Object userCheck = validationQuery.getSingleResult();
+                    if (userCheck instanceof Number) {
+                        Long actualUserId = ((Number) userCheck).longValue();
+                        if (actualUserId.equals(userId)) {
+                            log.error("Data integrity issue: Merchant ID {} has user_id {}. This should not be the same value!", merchantId, actualUserId);
+                            log.error("This will cause vouchers to be created with userId instead of merchantId!");
+                            // Return null to prevent the bug - this will cause the controller to return an error
+                            return null;
+                        } else {
+                            log.error("Merchant ID {} belongs to user {}, not user {}. Returning null.", merchantId, actualUserId, userId);
+                            return null;
+                        }
+                    }
+                } catch (Exception e2) {
+                    log.error("Error validating merchant ID: {}", e2.getMessage(), e2);
+                    return null;
+                }
+            }
+            
+            // Additional validation: Verify the merchant actually belongs to this user
+            String verifySql = "SELECT COUNT(*) FROM merchant_schema.merchants WHERE id = :merchantId AND user_id = :userId";
+            Query verifyQuery = entityManager.createNativeQuery(verifySql);
+            verifyQuery.setParameter("merchantId", merchantId);
+            verifyQuery.setParameter("userId", userId);
+            Object countResult = verifyQuery.getSingleResult();
+            if (countResult instanceof Number && ((Number) countResult).longValue() == 0) {
+                log.error("Merchant ID {} does not belong to user ID {}. Returning null.", merchantId, userId);
+                return null;
+            }
+            
+            log.info("Successfully retrieved merchant ID: {} for user ID: {}", merchantId, userId);
+            return merchantId;
         } catch (NoResultException e) {
             log.warn("No merchant found for user ID: {}", userId);
             return null;

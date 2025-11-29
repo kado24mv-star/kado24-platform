@@ -3,6 +3,7 @@ package com.kado24.admin.controller;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/admin")
 @CrossOrigin(
@@ -34,8 +36,10 @@ public class AdminDashboardController {
                 "SELECT COUNT(*) FROM auth_schema.users WHERE role != 'ADMIN'"
             );
             long totalUsers = ((Number) userQuery.getSingleResult()).longValue();
+            log.info("Dashboard query - Total users: {}", totalUsers);
             data.put("totalUsers", totalUsers);
         } catch (Exception e) {
+            log.error("Error querying total users: {}", e.getMessage(), e);
             data.put("totalUsers", 0);
         }
         
@@ -45,8 +49,10 @@ public class AdminDashboardController {
                 "SELECT COUNT(*) FROM merchant_schema.merchants"
             );
             long totalMerchants = ((Number) merchantQuery.getSingleResult()).longValue();
+            log.info("Dashboard query - Total merchants: {}", totalMerchants);
             data.put("totalMerchants", totalMerchants);
         } catch (Exception e) {
+            log.error("Error querying total merchants: {}", e.getMessage(), e);
             data.put("totalMerchants", 0);
         }
         
@@ -56,8 +62,10 @@ public class AdminDashboardController {
                 "SELECT COUNT(*) FROM voucher_schema.vouchers"
             );
             long totalVouchers = ((Number) voucherQuery.getSingleResult()).longValue();
+            log.info("Dashboard query - Total vouchers: {}", totalVouchers);
             data.put("totalVouchers", totalVouchers);
         } catch (Exception e) {
+            log.error("Error querying total vouchers: {}", e.getMessage(), e);
             data.put("totalVouchers", 0);
         }
         
@@ -67,8 +75,10 @@ public class AdminDashboardController {
                 "SELECT COUNT(*) FROM order_schema.orders"
             );
             long totalOrders = ((Number) orderQuery.getSingleResult()).longValue();
+            log.info("Dashboard query - Total orders: {}", totalOrders);
             data.put("totalOrders", totalOrders);
         } catch (Exception e) {
+            log.error("Error querying total orders: {}", e.getMessage(), e);
             data.put("totalOrders", 0);
         }
         
@@ -86,8 +96,10 @@ public class AdminDashboardController {
                     platformRevenue = ((Number) revenueResult).doubleValue();
                 }
             }
+            log.info("Dashboard query - Platform revenue: {}", platformRevenue);
             data.put("platformRevenue", platformRevenue);
         } catch (Exception e) {
+            log.error("Error querying platform revenue: {}", e.getMessage(), e);
             data.put("platformRevenue", 0.0);
         }
         

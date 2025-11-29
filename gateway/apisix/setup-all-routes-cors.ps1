@@ -13,7 +13,7 @@ $headers = @{
 
 # CORS configuration for all routes
 $CORS_CONFIG = @{
-    allow_origins = "http://localhost:4200,http://localhost:8001,http://localhost:8002"
+    allow_origins = "http://localhost:4200,http://localhost:5000,http://localhost:8001,http://localhost:8002"
     allow_methods = "GET,POST,PUT,DELETE,PATCH,OPTIONS"
     allow_headers = "Authorization,Content-Type,Accept,X-Requested-With"
     expose_headers = "Authorization,Content-Type,Accept"
@@ -178,7 +178,7 @@ Create-Route "40" "merchants-my-statistics-route" "/api/v1/merchants/my-statisti
 # 12. Admin Portal Backend Routes
 Create-Upstream "admin-portal-backend-upstream" "admin-portal-backend" 8089
 Create-Route "12" "admin-portal-backend-route-v1" "/api/v1/admin/*" @("GET","POST","PUT","DELETE","PATCH","OPTIONS") "admin-portal-backend-upstream" $false
-Create-Route "17" "admin-portal-backend-route" "/api/admin/*" @("GET","POST","PUT","DELETE","PATCH","OPTIONS") "admin-portal-backend-upstream" $false
+Create-Route "47" "admin-portal-backend-route" "/api/admin/*" @("GET","POST","PUT","DELETE","PATCH","OPTIONS") "admin-portal-backend-upstream" $false
 
 # 14. Notification Service Routes (Protected)
 Create-Route "14" "notification-service-route" "/api/v1/notifications/*" @("GET","POST","PUT","DELETE","PATCH","OPTIONS") "notification-service-upstream" $true
@@ -205,9 +205,9 @@ Create-Route "45" "mock-payment-status-route" "/api/mock/payment/status/*" @("GE
 Create-Route "46" "mock-payment-page-route" "/api/mock/payment/page" @("GET","OPTIONS") "payment-service-upstream" $false
 
 # 52-54. Admin Verifications Routes
-Create-Route "52" "admin-verifications-pending-route" "/api/v1/admin/verifications/pending" @("GET","OPTIONS") "auth-service-upstream" $true
-Create-Route "53" "admin-verifications-verify-route" "/api/v1/admin/verifications/*/verify" @("POST","OPTIONS") "auth-service-upstream" $true
-Create-Route "54" "admin-verifications-reject-route" "/api/v1/admin/verifications/*/reject" @("POST","OPTIONS") "auth-service-upstream" $true
+Create-Route "52" "admin-verifications-pending-route" "/api/v1/admin/verifications/pending" @("GET","OPTIONS") "auth-service-upstream" $false
+Create-Route "53" "admin-verifications-verify-route" "/api/v1/admin/verifications/*/verify" @("POST","OPTIONS") "auth-service-upstream" $false
+Create-Route "54" "admin-verifications-reject-route" "/api/v1/admin/verifications/*/reject" @("POST","OPTIONS") "auth-service-upstream" $false
 
 # 13. Health Check Route (Public)
 $healthRoute = @{
@@ -238,9 +238,10 @@ Write-Host "  - Gateway: http://localhost:9080"
 Write-Host "  - Admin API: http://localhost:9091"
 Write-Host ""
 Write-Host "CORS enabled for:" -ForegroundColor Cyan
-Write-Host "  - Consumer App: http://localhost:8002"
-Write-Host "  - Merchant App: http://localhost:8001"
 Write-Host "  - Admin Portal: http://localhost:4200"
+Write-Host "  - Merchant App: http://localhost:5000"
+Write-Host "  - Consumer App: http://localhost:8001"
+Write-Host "  - Consumer App (Alt): http://localhost:8002"
 Write-Host ""
 Write-Host "To run this script again after restart:" -ForegroundColor Yellow
 Write-Host "  cd gateway\apisix"

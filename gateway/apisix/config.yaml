@@ -187,9 +187,9 @@ plugin_attr:
   
   # CORS default config
   cors:
-    allow_origins: "http://localhost:4200,http://localhost:8001,http://localhost:8002"
+    allow_origins: "http://localhost:4200,http://localhost:4201,http://localhost:8001,http://localhost:8002"
     allow_methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
-    allow_headers: "Authorization,Content-Type,Accept,X-Requested-With"
+    allow_headers: "Authorization,Content-Type,Accept,X-Requested-With,Origin"
     max_age: 3600
     expose_headers: "Authorization,Content-Type"
     allow_credential: true

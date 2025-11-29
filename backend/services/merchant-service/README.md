@@ -38,7 +38,7 @@ Swagger UI: http://localhost:8088/swagger-ui.html
 
 ```bash
 curl -X POST http://localhost:8088/api/v1/merchants/register \
-  -H "Authorization: Bearer USER_JWT_TOKEN" \
+  -H "Authorization: Bearer USER_OAUTH2_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "businessName": "Blue Pumpkin Cafe",
@@ -54,7 +54,7 @@ curl -X POST http://localhost:8088/api/v1/merchants/register \
 
 ```bash
 curl -X POST http://localhost:8088/api/v1/merchants/1/approve \
-  -H "Authorization: Bearer ADMIN_JWT_TOKEN"
+  -H "Authorization: Bearer ADMIN_OAUTH2_TOKEN"
 ```
 
 ## 🔗 Dependencies

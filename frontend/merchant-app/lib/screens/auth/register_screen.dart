@@ -270,6 +270,7 @@ class _MerchantRegisterScreenState extends State<MerchantRegisterScreen> {
       );
 
       if (userResponse.statusCode != 201 && userResponse.statusCode != 200) {
+        // Registration failed - show error popup and stop execution
         final errorData = jsonDecode(userResponse.body);
         String errorMessage = 'Registration failed';
         
@@ -294,125 +295,472 @@ class _MerchantRegisterScreenState extends State<MerchantRegisterScreen> {
           errorMessage = '$errorMessage\n\nThis phone number or email is already registered. Please try logging in instead.';
         }
         
+        // Throw exception to be caught by catch block - this will show error popup and stop execution
         throw Exception(errorMessage);
       }
 
-      // Step 3: Extract token from registration response (registration returns tokens directly)
+      // Step 3: User registration successful - show OTP verification popup
+      // Only reach here if registration was successful (200 or 201)
       final userData = jsonDecode(userResponse.body);
-      String? token;
       
-      if (userData['data'] != null && userData['data']['accessToken'] != null) {
-        token = userData['data']['accessToken'];
-      } else {
-        // If registration doesn't return token, try to login
-        // Note: Login may fail for PENDING_VERIFICATION accounts, so we'll handle that
-        try {
-          final loginResponse = await http.post(
-            Uri.parse('${ApiConfig.getAuthUrl()}/api/v1/auth/login'),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'identifier': phone,
-              'password': password,
-            }),
-          );
-
-          if (loginResponse.statusCode == 200) {
-            final loginData = jsonDecode(loginResponse.body);
-            token = loginData['data']['accessToken'];
-          } else {
-            // Login failed - account might be pending verification
-            // But we can still try merchant registration if we have a token from registration
-            final errorData = jsonDecode(loginResponse.body);
-            String errorMessage = errorData['error']?['message'] ?? errorData['message'] ?? 'Login failed';
-            
-            if (errorMessage.contains('not active') || errorMessage.contains('PENDING')) {
-              // Account is pending, but registration should have returned a token
-              // If not, we'll show an error
-              throw Exception('Registration successful, but account is pending approval. Please wait for admin approval before completing merchant registration.');
-            } else {
-              throw Exception('Login failed: $errorMessage');
-            }
-          }
-        } catch (e) {
-          // If login fails and we don't have a token from registration, throw error
-          if (token == null) {
-            rethrow;
-          }
-          // Otherwise, continue with token from registration
-        }
-      }
-      
-      if (token == null) {
-        throw Exception('Failed to obtain access token. Please try again.');
-      }
-
-      // Step 4: Register as merchant
-      final merchantResponse = await http.post(
-        Uri.parse('${ApiConfig.getMerchantUrl()}/api/v1/merchants/register'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'businessName': _businessNameController.text.trim(),
-          'businessType': _businessTypeController.text.trim(),
-          'businessLicense': _licenseController.text.trim().isEmpty 
-              ? 'LIC-${DateTime.now().millisecondsSinceEpoch}' 
-              : _licenseController.text.trim(),
-          'taxId': 'TAX-${DateTime.now().millisecondsSinceEpoch}',
-          'phoneNumber': phone,
-          'email': _emailController.text.trim().isEmpty ? null : _emailController.text.trim(),
-          'description': 'Merchant registered via web app',
-          'addressLine1': '123 Main Street',
-          'city': 'Phnom Penh',
-          'province': 'Phnom Penh',
-          'bankName': 'ABA Bank',
-          'bankAccountNumber': '000000000',
-          'bankAccountName': _businessNameController.text.trim(),
-        }),
-      );
-
+      // After successful registration, OTP verification is typically required
+      // Show OTP popup dialog immediately
       if (mounted) {
         setState(() => _isLoading = false);
-
-        if (merchantResponse.statusCode == 201 || merchantResponse.statusCode == 200) {
-          // Show success dialog and navigate to login
-          if (mounted) {
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (dialogContext) => AlertDialog(
-                title: const Text('✓ Application Submitted'),
-                content: const Text(
-                  'Your merchant application has been successfully submitted!\n\n'
-                  'Our admin team will review your application within 24-48 hours.\n\n'
-                  'You can now login and will see a pending approval status.',
+        _showOTPVerificationDialog(phone);
+        return; // Exit early, OTP dialog will handle merchant registration after verification
+      }
+      
+      // Note: The OTP dialog will handle merchant registration after OTP verification
+      // The code below is a fallback in case OTP dialog doesn't handle it
+      // But typically, we show OTP dialog and return early, so this won't execute
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        
+        // Show error as popup dialog instead of SnackBar
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (dialogContext) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.red, size: 28),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Registration Failed',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
                 ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(dialogContext); // Close dialog
-                      // Navigate to login page using pushReplacementNamed to ensure clean navigation
-                      Navigator.pushReplacementNamed(context, '/login');
-                    },
-                    child: const Text('OK'),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    e.toString().replaceAll('Exception: ', ''),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Tip: If this phone number is already registered, please try logging in instead.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-            );
-          }
-        } else {
-          throw Exception('Merchant registration failed: ${merchantResponse.body}');
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                },
+                child: const Text(
+                  'OK',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              if (e.toString().contains('already registered') || 
+                  e.toString().contains('Phone number'))
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                    Navigator.pushReplacementNamed(context, '/login');
+                  },
+                  child: const Text(
+                    'Go to Login',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4FACFE),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  void _showOTPVerificationDialog(String phoneNumber) {
+    final List<TextEditingController> otpControllers = List.generate(6, (_) => TextEditingController());
+    final List<FocusNode> otpFocusNodes = List.generate(6, (_) => FocusNode());
+    int resendTimer = 45;
+    bool isVerifying = false;
+
+    void startResendTimer() {
+      Future.doWhile(() async {
+        await Future.delayed(const Duration(seconds: 1));
+        if (mounted && resendTimer > 0) {
+          resendTimer--;
+          return true;
+        }
+        return false;
+      });
+    }
+
+    startResendTimer();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.phone_android, color: Color(0xFF4FACFE), size: 28),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Verify Phone Number',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Enter the 6-digit code sent to',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  phoneNumber,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF4FACFE),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // OTP Input
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(6, (index) {
+                    return SizedBox(
+                      width: 45,
+                      height: 55,
+                      child: TextField(
+                        controller: otpControllers[index],
+                        focusNode: otpFocusNodes[index],
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        maxLength: 1,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        decoration: InputDecoration(
+                          counterText: '',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF4FACFE),
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          if (value.isNotEmpty && index < 5) {
+                            otpFocusNodes[index + 1].requestFocus();
+                          } else if (value.isEmpty && index > 0) {
+                            otpFocusNodes[index - 1].requestFocus();
+                          }
+                          if (index == 5 && value.isNotEmpty) {
+                            _verifyOTPInDialog(
+                              dialogContext,
+                              otpControllers.map((c) => c.text).join(),
+                              phoneNumber,
+                            );
+                          }
+                        },
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Didn't receive code? ", 
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                    if (resendTimer > 0)
+                      Text('Resend (${resendTimer}s)', 
+                        style: TextStyle(color: Colors.grey[400], fontSize: 12))
+                    else
+                      InkWell(
+                        onTap: () {
+                          _resendOTP(phoneNumber);
+                          setDialogState(() {
+                            resendTimer = 45;
+                            startResendTimer();
+                          });
+                        },
+                        child: const Text(
+                          'Resend',
+                          style: TextStyle(
+                            color: Color(0xFF4FACFE),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                Navigator.pushReplacementNamed(context, '/login');
+              },
+              child: const Text('Skip for now'),
+            ),
+            ElevatedButton(
+              onPressed: isVerifying
+                  ? null
+                  : () {
+                      final otp = otpControllers.map((c) => c.text).join();
+                      if (otp.length == 6) {
+                        _verifyOTPInDialog(dialogContext, otp, phoneNumber);
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4FACFE),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: isVerifying
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text(
+                      'Verify',
+                      style: TextStyle(color: Colors.white),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _verifyOTPInDialog(
+    BuildContext dialogContext,
+    String otp,
+    String phoneNumber,
+  ) async {
+    try {
+      // Call OTP verification API
+      final response = await http.post(
+        Uri.parse('${ApiConfig.getAuthUrl()}/api/v1/auth/verify-otp'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'phoneNumber': phoneNumber,
+          'otpCode': otp,  // Fixed: changed from 'otp' to 'otpCode'
+          'purpose': 'REGISTRATION',  // Added purpose for registration
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // OTP verified successfully - tokens are included in response
+        final responseData = jsonDecode(response.body);
+        final token = responseData['data']['accessToken'];
+        
+        if (mounted) {
+          Navigator.of(dialogContext).pop();
+          // Continue with merchant registration using tokens from verify-otp
+          _continueMerchantRegistrationAfterOTP(phoneNumber, token);
+        }
+      } else {
+        // OTP verification failed
+        final errorData = jsonDecode(response.body);
+        String errorMessage = 'Invalid OTP. Please try again.';
+        
+        if (errorData['error'] != null && errorData['error']['message'] != null) {
+          errorMessage = errorData['error']['message'];
+        } else if (errorData['message'] != null) {
+          errorMessage = errorData['message'];
+        }
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('OTP verification failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _continueMerchantRegistrationAfterOTP(String phoneNumber, String token) async {
+    // After OTP verification, continue with merchant registration
+    // Token is already provided from verify-otp response, no need to login again
+    setState(() => _isLoading = true);
+    
+    try {
+      // Continue with merchant registration using token from verify-otp
+      await _registerMerchant(token, phoneNumber);
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Registration failed: ${e.toString()}'),
+            content: Text('Failed to continue registration: ${e.toString()}'),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _registerMerchant(String token, String phoneNumber) async {
+    final merchantResponse = await http.post(
+      Uri.parse('${ApiConfig.getMerchantUrl()}/api/v1/merchants/register'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'businessName': _businessNameController.text.trim(),
+        'businessType': _businessTypeController.text.trim(),
+        'businessLicense': _licenseController.text.trim().isEmpty
+            ? 'LIC-${DateTime.now().millisecondsSinceEpoch}'
+            : _licenseController.text.trim(),
+        'taxId': 'TAX-${DateTime.now().millisecondsSinceEpoch}',
+        'phoneNumber': phoneNumber,
+        'email': _emailController.text.trim().isEmpty
+            ? null
+            : _emailController.text.trim(),
+        'description': 'Merchant registered via web app',
+        'addressLine1': '123 Main Street',
+        'city': 'Phnom Penh',
+        'province': 'Phnom Penh',
+        'bankName': 'ABA Bank',
+        'bankAccountNumber': '000000000',
+        'bankAccountName': _businessNameController.text.trim(),
+      }),
+    );
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+
+      if (merchantResponse.statusCode == 201 || merchantResponse.statusCode == 200) {
+        // Show success dialog
+        if (mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (dialogContext) => AlertDialog(
+              title: const Text('✓ Application Submitted'),
+              content: const Text(
+                'Your merchant application has been successfully submitted!\n\n'
+                'Our admin team will review your application within 24-48 hours.\n\n'
+                'You can now login and will see a pending approval status.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                    Navigator.pushReplacementNamed(context, '/login');
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+      } else {
+        throw Exception('Merchant registration failed: ${merchantResponse.body}');
+      }
+    }
+  }
+
+  Future<void> _resendOTP(String phoneNumber) async {
+    try {
+      await http.post(
+        Uri.parse('${ApiConfig.getAuthUrl()}/api/v1/auth/send-otp'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'phoneNumber': phoneNumber,
+          'purpose': 'REGISTRATION',
+        }),
+      );
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('OTP sent!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to resend OTP: ${e.toString()}'),
+            backgroundColor: Colors.red,
           ),
         );
       }

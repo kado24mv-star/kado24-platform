@@ -1,0 +1,69 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'auth-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['kado24-auth-service:8081']
+
+  - job_name: 'user-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['kado24-user-service:8082']
+
+  - job_name: 'voucher-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['kado24-voucher-service:8083']
+
+  - job_name: 'order-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['kado24-order-service:8084']
+
+  - job_name: 'wallet-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['kado24-wallet-service:8086']
+
+  - job_name: 'redemption-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['kado24-redemption-service:8087']
+
+  - job_name: 'merchant-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['kado24-merchant-service:8088']
+
+  - job_name: 'admin-portal-backend'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['kado24-admin-portal-backend:8089']
+
+  - job_name: 'notification-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['kado24-notification-service:8091']
+
+  - job_name: 'payout-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['kado24-payout-service:8092']
+
+  - job_name: 'analytics-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['kado24-analytics-service:8093']
+
+  - job_name: 'mock-payment-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['kado24-mock-payment-service:8095']
+

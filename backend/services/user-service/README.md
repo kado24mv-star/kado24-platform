@@ -47,14 +47,14 @@ Swagger UI: http://localhost:8082/swagger-ui.html
 
 ```bash
 curl -X GET http://localhost:8082/api/v1/users/profile \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+  -H "Authorization: Bearer YOUR_OAUTH2_TOKEN"
 ```
 
 ### Update Profile
 
 ```bash
 curl -X PUT http://localhost:8082/api/v1/users/profile \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Authorization: Bearer YOUR_OAUTH2_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "fullName": "Sok Dara Updated",
@@ -99,7 +99,7 @@ Response:
 
 ## 🔒 Security
 
-All endpoints require JWT authentication. User can only access their own profile unless they have ADMIN role.
+All endpoints require OAuth2 authentication. User can only access their own profile unless they have ADMIN role.
 
 ## 📁 Project Structure
 

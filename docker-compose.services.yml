@@ -1,11 +1,19 @@
 name: kado24-platform
 
 x-backend-env: &backend-env
-  POSTGRES_HOST: host.docker.internal
-  POSTGRES_PORT: "5432"
-  POSTGRES_DB: kado24_db
-  POSTGRES_USER: kado24_user
-  POSTGRES_PASSWORD: kado24_pass
+  # Database Configuration - AWS RDS PostgreSQL
+  POSTGRES_HOST: ${POSTGRES_HOST:-kado24-dev-db.cfcki64aaw44.ap-southeast-1.rds.amazonaws.com}
+  POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+  POSTGRES_DB: ${POSTGRES_DB:-postgres}
+  POSTGRES_USER: ${POSTGRES_USER:-kado24_dev_user}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-docTod-dyfvi0-nesbux}
+  # Alternative variable names for compatibility
+  DB_HOST: ${DB_HOST:-${POSTGRES_HOST:-kado24-dev-db.cfcki64aaw44.ap-southeast-1.rds.amazonaws.com}}
+  DB_PORT: ${DB_PORT:-${POSTGRES_PORT:-5432}}
+  DB_NAME: ${DB_NAME:-${POSTGRES_DB:-postgres}}
+  DB_USER: ${DB_USER:-${POSTGRES_USER:-kado24_dev_user}}
+  DB_PASSWORD: ${DB_PASSWORD:-${POSTGRES_PASSWORD:-docTod-dyfvi0-nesbux}}
+  # Redis Configuration
   REDIS_HOST: kado24-redis
   REDIS_PORT: "6379"
   REDIS_PASSWORD: kado24_redis_pass

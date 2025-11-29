@@ -35,12 +35,13 @@ public class VerificationRequestService {
      */
     @Transactional
     public VerificationRequest createVerificationRequest(Long userId, String phoneNumber, String otpCode) {
-        log.info("Creating verification request for user: {}", userId);
+        log.info("Creating verification request for user: {}, phone: {}, OTP: {}", userId, phoneNumber, otpCode);
 
         // Invalidate any existing pending requests for this user
         Optional<VerificationRequest> existing = verificationRequestRepository.findByUserId(userId);
         if (existing.isPresent() && existing.get().getStatus() == VerificationRequest.VerificationStatus.PENDING) {
             VerificationRequest existingReq = existing.get();
+            log.info("Invalidating existing verification request ID: {} for user: {}", existingReq.getId(), userId);
             existingReq.setStatus(VerificationRequest.VerificationStatus.EXPIRED);
             verificationRequestRepository.save(existingReq);
         }
@@ -54,7 +55,14 @@ public class VerificationRequestService {
                 .expiresAt(LocalDateTime.now().plusMinutes(OTP_EXPIRATION_MINUTES))
                 .build();
 
-        return verificationRequestRepository.save(request);
+        VerificationRequest saved = verificationRequestRepository.save(request);
+        // Flush to ensure it's persisted immediately
+        verificationRequestRepository.flush();
+        
+        log.info("Verification request created successfully. ID: {}, User ID: {}, Phone: {}, OTP: {}, Expires at: {}", 
+                saved.getId(), saved.getUserId(), saved.getPhoneNumber(), saved.getOtpCode(), saved.getExpiresAt());
+        
+        return saved;
     }
 
     /**

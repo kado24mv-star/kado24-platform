@@ -11,6 +11,7 @@
     <groupId>com.kado24</groupId>
     <artifactId>notification-service</artifactId>
     <version>1.0.0</version>
+    <packaging>war</packaging>
     <name>Kado24 Notification Service</name>
 
     <properties>
@@ -31,6 +32,11 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
@@ -42,6 +48,14 @@
             <groupId>com.kado24</groupId>
             <artifactId>common-lib</artifactId>
             <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
             <groupId>com.kado24</groupId>

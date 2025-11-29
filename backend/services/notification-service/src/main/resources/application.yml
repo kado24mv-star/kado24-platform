@@ -6,9 +6,9 @@ spring:
     name: notification-service
   
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:${DB_HOST:localhost}}:${POSTGRES_PORT:${DB_PORT:5432}}/${POSTGRES_DB:${DB_NAME:kado24_db}}?currentSchema=notification_schema
-    username: ${POSTGRES_USER:${DB_USER:kado24_user}}
-    password: ${POSTGRES_PASSWORD:${DB_PASSWORD:kado24_pass}}
+    url: jdbc:postgresql://${POSTGRES_HOST:${DB_HOST:kado24-dev-db.cfcki64aaw44.ap-southeast-1.rds.amazonaws.com}}:${POSTGRES_PORT:${DB_PORT:5432}}/${POSTGRES_DB:${DB_NAME:postgres}}?currentSchema=notification_schema
+    username: ${POSTGRES_USER:${DB_USER:kado24_dev_user}}
+    password: ${POSTGRES_PASSWORD:${DB_PASSWORD:docTod-dyfvi0-nesbux}}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 3
@@ -24,6 +24,12 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081
+          jwk-set-uri: http://localhost:8081/oauth2/jwks
   # Kafka configuration (commented out - Kafka removed from infrastructure)
   # kafka:
   #   bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}

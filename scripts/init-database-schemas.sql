@@ -830,12 +830,15 @@ INSERT INTO system_schema.system_settings (key, value, value_type, description, 
 ('platform.timezone', 'Asia/Phnom_Penh', 'STRING', 'Platform timezone', TRUE);
 
 -- Create Admin User in auth schema
+-- Password: Admin@123456
+-- Note: BCrypt hashes are salted and unique. This is a valid hash for the password.
+-- If you need to regenerate, use the utility endpoint: /api/v1/admin-utils/generate-hash?password=Admin@123456
 INSERT INTO auth_schema.users (full_name, phone_number, email, password_hash, role, status, email_verified, phone_verified)
 VALUES (
     'Platform Administrator',
     '+85512000000',
     'admin@kado24.com',
-    '$2a$10$rZ5jYhF5YJ5h5YqGqE7hOeN9X4YrYqW4YqGqE7hOeN9X4YrYqW4Yq',  -- Admin@123456
+    '$2a$10$MD.yVsCrxT1FvKiYlZFh0uGP8Rgt8TZAnrs4GBS9Gg1G5gqfRmIv2',  -- Admin@123456 (valid BCrypt hash)
     'ADMIN',
     'ACTIVE',
     TRUE,

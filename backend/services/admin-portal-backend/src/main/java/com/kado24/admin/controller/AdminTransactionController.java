@@ -21,7 +21,7 @@ public class AdminTransactionController {
 
     private final RestTemplate restTemplate;
     
-    @Value("${services.order.base-url:http://localhost:8084}")
+    @Value("${services.order.base-url:http://kado24-order-service:8084}")
     private String orderServiceUrl;
 
     public AdminTransactionController(RestTemplate restTemplate) {

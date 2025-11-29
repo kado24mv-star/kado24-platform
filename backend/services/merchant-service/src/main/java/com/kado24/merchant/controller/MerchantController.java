@@ -168,6 +168,7 @@ public class MerchantController {
     // Admin endpoints (public for admin-portal-backend proxy)
     @Operation(summary = "Get pending merchants (Admin API)", description = "Get merchants awaiting approval for admin portal")
     @GetMapping("/admin/pending")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<Page<MerchantDTO>>> getAdminPendingMerchants(
             @ModelAttribute PageRequest pageRequest) {
 
@@ -186,6 +187,7 @@ public class MerchantController {
 
     @Operation(summary = "Approve merchant (Admin API)", description = "Approve merchant application from admin portal")
     @PostMapping("/admin/{merchantId}/approve")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<MerchantDTO>> adminApproveMerchant(@PathVariable Long merchantId) {
         log.info("Admin API: Approving merchant: {}", merchantId);
 
@@ -197,6 +199,7 @@ public class MerchantController {
 
     @Operation(summary = "Reject merchant (Admin API)", description = "Reject merchant application from admin portal")
     @PostMapping("/admin/{merchantId}/reject")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<MerchantDTO>> adminRejectMerchant(
             @PathVariable Long merchantId,
             @RequestParam String reason) {
@@ -211,6 +214,7 @@ public class MerchantController {
 
     @Operation(summary = "Get merchant details (Admin API)", description = "Get merchant details by ID for admin portal")
     @GetMapping("/admin/{merchantId}")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<MerchantDTO>> getAdminMerchantDetails(@PathVariable Long merchantId) {
         log.info("Admin API: Fetching merchant details: {}", merchantId);
 

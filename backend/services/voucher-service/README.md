@@ -40,7 +40,7 @@ Swagger UI: http://localhost:8083/swagger-ui.html
 | GET | `/api/v1/categories` | Get all categories |
 | GET | `/api/v1/categories/{slug}` | Get category by slug |
 
-### Merchant Endpoints (Requires JWT)
+### Merchant Endpoints (Requires OAuth2 Token)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -74,7 +74,7 @@ curl "http://localhost:8083/api/v1/categories"
 
 ```bash
 curl -X POST http://localhost:8083/api/v1/vouchers \
-  -H "Authorization: Bearer MERCHANT_JWT_TOKEN" \
+  -H "Authorization: Bearer MERCHANT_OAUTH2_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "categoryId": 1,
