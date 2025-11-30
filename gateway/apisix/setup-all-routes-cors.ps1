@@ -139,7 +139,7 @@ Create-Route "21" "user-service-base-route" "/api/v1/users" @("GET","POST","PUT"
 
 # 3-5. Voucher Service Routes
 Create-Route "3" "voucher-service-public-read" "/api/v1/vouchers" @("GET","OPTIONS") "voucher-service-upstream" $false
-Create-Route "34" "voucher-service-create" "/api/v1/vouchers" @("POST","OPTIONS") "voucher-service-upstream" $false
+Create-Route "55" "voucher-service-create" "/api/v1/vouchers" @("POST","OPTIONS") "voucher-service-upstream" $false
 Create-Route "4" "voucher-service-single" "/api/v1/vouchers/*" @("GET","OPTIONS") "voucher-service-upstream" $false
 Create-Route "5" "voucher-service-protected-write" "/api/v1/vouchers/*" @("POST","PUT","DELETE","PATCH","OPTIONS") "voucher-service-upstream" $true
 Create-Route "28" "vouchers-search-route" "/api/v1/vouchers/search" @("GET","OPTIONS") "voucher-service-upstream" $false
