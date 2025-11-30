@@ -86,12 +86,7 @@
             <version>1.0.0</version>
         </dependency>
 
-        <!-- Hibernate types for PostgreSQL arrays -->
-        <dependency>
-            <groupId>com.vladmihalcea</groupId>
-            <artifactId>hibernate-types-60</artifactId>
-            <version>2.21.1</version>
-        </dependency>
+        <!-- PostgreSQL arrays are supported natively by Hibernate 6.3+ via @JdbcTypeCode(SqlTypes.ARRAY) -->
         
         <!-- Lombok -->
         <dependency>

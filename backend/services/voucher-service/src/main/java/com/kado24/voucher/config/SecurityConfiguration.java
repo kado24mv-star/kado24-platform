@@ -1,6 +1,5 @@
 package com.kado24.voucher.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -26,13 +25,17 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-@RequiredArgsConstructor
 public class SecurityConfiguration {
 
     private final JwtUserIdExtractorFilter jwtUserIdExtractorFilter;
+    private final String jwkSetUri;
 
-    @org.springframework.beans.factory.annotation.Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:http://auth-service:8081/oauth2/jwks}")
-    private String jwkSetUri;
+    public SecurityConfiguration(
+            JwtUserIdExtractorFilter jwtUserIdExtractorFilter,
+            @org.springframework.beans.factory.annotation.Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:http://auth-service:8081/oauth2/jwks}") String jwkSetUri) {
+        this.jwtUserIdExtractorFilter = jwtUserIdExtractorFilter;
+        this.jwkSetUri = jwkSetUri;
+    }
 
     @Bean(name = "voucherSecurityFilterChain")
     @Primary

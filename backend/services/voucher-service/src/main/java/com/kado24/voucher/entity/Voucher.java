@@ -5,11 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.vladmihalcea.hibernate.type.array.ListArrayType;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
@@ -55,11 +52,9 @@ public class Voucher {
     @Column(name = "terms_conditions", columnDefinition = "TEXT", nullable = true)
     private String termsAndConditions;
 
-    @Type(value = ListArrayType.class, parameters = {
-            @Parameter(name = ListArrayType.SQL_ARRAY_TYPE, value = "numeric")
-    })
+    @JdbcTypeCode(SqlTypes.ARRAY)
     @Column(name = "denominations", columnDefinition = "numeric[]")
-    private List<BigDecimal> denominations;
+    private BigDecimal[] denominations;
 
     @Column(name = "discount_percentage", precision = 5, scale = 2)
     private BigDecimal discountPercentage;
@@ -67,11 +62,9 @@ public class Voucher {
     @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
-    @Type(value = ListArrayType.class, parameters = {
-            @Parameter(name = ListArrayType.SQL_ARRAY_TYPE, value = "text")
-    })
+    @JdbcTypeCode(SqlTypes.ARRAY)
     @Column(name = "additional_image", columnDefinition = "text[]", nullable = true)
-    private List<String> additionalImages;
+    private String[] additionalImages;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
@@ -91,11 +84,9 @@ public class Voucher {
     @Column(name = "valid_until")
     private LocalDateTime validUntil;
 
-    @Type(value = ListArrayType.class, parameters = {
-            @Parameter(name = ListArrayType.SQL_ARRAY_TYPE, value = "text")
-    })
+    @JdbcTypeCode(SqlTypes.ARRAY)
     @Column(name = "redemption_locations", columnDefinition = "text[]", nullable = true)
-    private List<String> redemptionLocations;
+    private String[] redemptionLocations;
 
     @Column(name = "min_value", precision = 10, scale = 2, nullable = false)
     private BigDecimal minValue;
