@@ -23,6 +23,9 @@ import java.util.Arrays;
 @EnableMethodSecurity(prePostEnabled = true)
 public class OAuth2ResourceServerConfig {
 
+    @org.springframework.beans.factory.annotation.Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:http://auth-service:8081/oauth2/jwks}")
+    private String jwkSetUri;
+
     @Bean
     @ConditionalOnMissingBean(name = "voucherSecurityFilterChain")
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -33,7 +36,7 @@ public class OAuth2ResourceServerConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
-                                .jwkSetUri("http://localhost:8081/oauth2/jwks")
+                                .jwkSetUri(jwkSetUri)
                         )
                 )
                 .authorizeHttpRequests(auth -> auth

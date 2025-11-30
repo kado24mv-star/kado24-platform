@@ -18,6 +18,11 @@ spring:
   main:
     allow-bean-definition-overriding: true
   
+  security:
+    oauth2:
+      authorizationserver:
+        issuer: ${AUTH_ISSUER_URI:http://auth-service:8081}
+  
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:${DB_HOST:kado24-dev-db.cfcki64aaw44.ap-southeast-1.rds.amazonaws.com}}:${POSTGRES_PORT:${DB_PORT:5432}}/${POSTGRES_DB:${DB_NAME:postgres}}?currentSchema=auth_schema
     username: ${POSTGRES_USER:${DB_USER:kado24_dev_user}}

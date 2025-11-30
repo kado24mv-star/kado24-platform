@@ -32,8 +32,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${OAUTH2_ISSUER_URI:http://kado24-auth-service:8081}
-          jwk-set-uri: ${OAUTH2_JWK_SET_URI:http://kado24-auth-service:8081/oauth2/jwks}
+          issuer-uri: ${AUTH_SERVICE_ISSUER:http://auth-service:8081}
+          jwk-set-uri: ${AUTH_SERVICE_JWKS:http://auth-service:8081/oauth2/jwks}
 
 management:
   endpoints:

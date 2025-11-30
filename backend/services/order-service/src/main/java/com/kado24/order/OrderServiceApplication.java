@@ -17,7 +17,21 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "com.kado24.common",
         "com.kado24.security",
         "com.kado24.kafka"
-})
+},
+        excludeFilters = {
+                @ComponentScan.Filter(
+                        type = org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE,
+                        classes = com.kado24.security.config.SecurityConfig.class
+                ),
+                @ComponentScan.Filter(
+                        type = org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE,
+                        classes = com.kado24.security.jwt.JwtAuthenticationFilter.class
+                ),
+                @ComponentScan.Filter(
+                        type = org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE,
+                        classes = com.kado24.security.jwt.JwtTokenProvider.class
+                )
+        })
 public class OrderServiceApplication extends SpringBootServletInitializer {
 
     @Override

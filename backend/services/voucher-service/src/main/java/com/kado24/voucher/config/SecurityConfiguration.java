@@ -31,6 +31,9 @@ public class SecurityConfiguration {
 
     private final JwtUserIdExtractorFilter jwtUserIdExtractorFilter;
 
+    @org.springframework.beans.factory.annotation.Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:http://auth-service:8081/oauth2/jwks}")
+    private String jwkSetUri;
+
     @Bean(name = "voucherSecurityFilterChain")
     @Primary
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -41,7 +44,7 @@ public class SecurityConfiguration {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
-                                .jwkSetUri("http://localhost:8081/oauth2/jwks")
+                                .jwkSetUri(jwkSetUri)
                         )
                 )
                 .addFilterAfter(jwtUserIdExtractorFilter, BearerTokenAuthenticationFilter.class)

@@ -145,10 +145,13 @@ public class OAuth2AuthorizationServerConfig {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
     }
 
+    @org.springframework.beans.factory.annotation.Value("${spring.security.oauth2.authorizationserver.issuer:http://auth-service:8081}")
+    private String issuerUri;
+    
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder()
-                .issuer("http://localhost:8081")
+                .issuer(issuerUri)
                 .build();
     }
 

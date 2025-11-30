@@ -28,8 +28,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8081
-          jwk-set-uri: http://localhost:8081/oauth2/jwks
+          issuer-uri: ${AUTH_SERVICE_ISSUER:http://auth-service:8081}
+          jwk-set-uri: ${AUTH_SERVICE_JWKS:http://auth-service:8081/oauth2/jwks}
   # Kafka configuration (commented out - Kafka removed from infrastructure)
   # kafka:
   #   bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
