@@ -81,9 +81,11 @@ otp:
   expiration: 300  # 5 minutes in seconds
 
 # Spring Security
-spring.security:
-  filter:
-    order: 5
+# Note: Filter order is managed by @Order annotations on SecurityFilterChain beans
+# Setting a global order here can interfere with OAuth2 filter chain ordering
+# spring.security:
+#   filter:
+#     order: 5
 
 # Actuator (Health & Metrics)
 management:
@@ -115,8 +117,13 @@ logging:
   level:
     root: INFO
     com.kado24: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.web: INFO
+    org.springframework.security: TRACE
+    org.springframework.security.oauth2: TRACE
+    org.springframework.security.oauth2.server: TRACE
+    org.springframework.security.oauth2.server.authorization: TRACE
+    org.springframework.security.oauth2.server.authorization.web: TRACE
+    org.springframework.web: DEBUG
+    org.springframework.web.servlet: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
   pattern:

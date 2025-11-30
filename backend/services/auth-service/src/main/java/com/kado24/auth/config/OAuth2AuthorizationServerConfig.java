@@ -21,7 +21,6 @@ import org.springframework.security.oauth2.server.authorization.client.InMemoryR
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
@@ -43,43 +42,38 @@ import java.util.UUID;
 
 /**
  * OAuth2 Authorization Server Configuration
+ * 
+ * Note: The OAuth2 client credentials flow has a known configuration issue.
+ * The JWKS endpoint (/oauth2/jwks) works correctly.
+ * User login/register flows work correctly with custom JWT tokens.
  */
 @Configuration
 @EnableWebSecurity
 public class OAuth2AuthorizationServerConfig {
 
-    /**
-     * Security filter chain for OAuth2 Authorization Server endpoints
-     */
     @Bean
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
         
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-                .oidc(Customizer.withDefaults()); // Enable OpenID Connect 1.0
+                .oidc(Customizer.withDefaults());
         
-        http
-                // Redirect to the login page when not authenticated from the authorization endpoint
-                .exceptionHandling((exceptions) -> exceptions
-                        .defaultAuthenticationEntryPointFor(
-                                new LoginUrlAuthenticationEntryPoint("/login"),
-                                new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
-                        )
+        http.exceptionHandling((exceptions) -> exceptions
+                .defaultAuthenticationEntryPointFor(
+                        new LoginUrlAuthenticationEntryPoint("/login"),
+                        new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
                 )
-                // Accept access tokens for User Info and/or Client Registration
-                .oauth2ResourceServer((resourceServer) -> resourceServer
-                        .jwt(Customizer.withDefaults()));
+        );
+        
+        http.oauth2ResourceServer((resourceServer) -> resourceServer
+                .jwt(Customizer.withDefaults()));
 
         return http.build();
     }
 
-    /**
-     * Registered client repository for OAuth2 clients
-     */
     @Bean
     public RegisteredClientRepository registeredClientRepository(PasswordEncoder passwordEncoder) {
-        // Frontend client (Consumer App, Merchant App, Admin Portal)
         RegisteredClient frontendClient = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("kado24-frontend")
                 .clientSecret(passwordEncoder.encode("kado24-frontend-secret"))
@@ -105,7 +99,6 @@ public class OAuth2AuthorizationServerConfig {
                         .build())
                 .build();
 
-        // Backend service client (for service-to-service communication)
         RegisteredClient backendClient = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("kado24-backend")
                 .clientSecret(passwordEncoder.encode("kado24-backend-secret"))
@@ -122,9 +115,6 @@ public class OAuth2AuthorizationServerConfig {
         return new InMemoryRegisteredClientRepository(frontendClient, backendClient);
     }
 
-    /**
-     * JWK Source for signing tokens
-     */
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
         KeyPair keyPair = generateRsaKey();
@@ -138,9 +128,6 @@ public class OAuth2AuthorizationServerConfig {
         return new ImmutableJWKSet<>(jwkSet);
     }
 
-    /**
-     * Generate RSA key pair for signing tokens
-     */
     private static KeyPair generateRsaKey() {
         KeyPair keyPair;
         try {
@@ -153,51 +140,29 @@ public class OAuth2AuthorizationServerConfig {
         return keyPair;
     }
 
-    /**
-     * JWT Decoder for resource servers
-     */
     @Bean
     public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
     }
 
-    /**
-     * Authorization Server Settings
-     */
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder()
                 .issuer("http://localhost:8081")
-                .authorizationEndpoint("/oauth2/authorize")
-                .tokenEndpoint("/oauth2/token")
-                .tokenIntrospectionEndpoint("/oauth2/introspect")
-                .tokenRevocationEndpoint("/oauth2/revoke")
-                .jwkSetEndpoint("/oauth2/jwks")
-                .oidcUserInfoEndpoint("/userinfo")
-                .oidcLogoutEndpoint("/logout")
                 .build();
     }
 
-    /**
-     * OAuth2 Authorization Service
-     * Required for storing OAuth2 authorizations
-     */
     @Bean
     public OAuth2AuthorizationService oAuth2AuthorizationService() {
         return new InMemoryOAuth2AuthorizationService();
     }
 
-    /**
-     * OAuth2 Token Customizer to add custom claims
-     */
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> jwtTokenCustomizer() {
         return (context) -> {
-            // Add custom claims
             if (context.getPrincipal().getName() != null) {
                 context.getClaims().claim("sub", context.getPrincipal().getName());
             }
-            // Add userId and role from authorization attributes
             if (context.getAuthorization() != null) {
                 Object userId = context.getAuthorization().getAttribute("userId");
                 Object role = context.getAuthorization().getAttribute("role");
@@ -210,8 +175,4 @@ public class OAuth2AuthorizationServerConfig {
             }
         };
     }
-
-    // Note: Token generators are auto-configured by Spring Authorization Server
-    // We only need to provide the token customizer
 }
-

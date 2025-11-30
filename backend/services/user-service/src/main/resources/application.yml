@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: user-service
+  main:
+    allow-bean-definition-overriding: true
   
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
@@ -38,9 +40,7 @@ spring:
   #   producer:
   #     acks: 1
   #     retries: 3
-
-# OAuth2 Resource Server Configuration
-spring:
+  
   security:
     oauth2:
       resourceserver:

@@ -21,6 +21,10 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
@@ -35,10 +39,12 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Configuration
-@EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfiguration {
+    
+    // NOTE: @EnableWebSecurity is on OAuth2AuthorizationServerConfig only
+    // This class just defines an additional SecurityFilterChain bean
 
     private final JwtDecoder jwtDecoder;
     
@@ -100,29 +106,26 @@ public class SecurityConfiguration {
     // This prevents the shared filter from being created
     // OAuth2 Resource Server will handle all JWT validation
 
-    @Bean(name = "voucherSecurityFilterChain")  // Match the conditional check in shared SecurityConfig
-    @org.springframework.core.annotation.Order(org.springframework.core.Ordered.HIGHEST_PRECEDENCE)
+    /**
+     * Security filter chain for API and Actuator endpoints.
+     * This filter chain handles all non-OAuth2 requests.
+     */
+    @Bean(name = "voucherSecurityFilterChain")
+    @Order(2)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
+        return http
+                .securityMatcher("/api/**", "/actuator/**", "/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**", "/health", "/error")
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(allowAllCorsConfigurationSource()))  // Allow all origins
+                .cors(cors -> cors.configurationSource(allowAllCorsConfigurationSource()))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> {
-                            log.info("Configuring OAuth2 Resource Server JWT validation");
                             jwt.decoder(jwtDecoder);
                             jwt.jwtAuthenticationConverter(jwtAuthenticationConverter());
-                            log.info("OAuth2 Resource Server JWT configuration complete");
                         })
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // OAuth2 endpoints
-                        .requestMatchers(
-                                "/oauth2/**",
-                                "/.well-known/**"
-                        ).permitAll()
-                        // Public endpoints
                         .requestMatchers(
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login",
@@ -131,7 +134,7 @@ public class SecurityConfiguration {
                                 "/api/v1/auth/forgot-password",
                                 "/api/v1/auth/reset-password",
                                 "/api/v1/auth/refresh",
-                                "/api/v1/admin-utils/**",  // Temporary utility endpoints
+                                "/api/v1/admin-utils/**",
                                 "/actuator/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
@@ -139,13 +142,10 @@ public class SecurityConfiguration {
                                 "/health",
                                 "/error"
                         ).permitAll()
-                        // Protected endpoints (logout)
                         .requestMatchers("/api/v1/auth/logout").authenticated()
-                        // All other requests need authentication
                         .anyRequest().authenticated()
-                );
-
-        return http.build();
+                )
+                .build();
     }
 
     @Bean

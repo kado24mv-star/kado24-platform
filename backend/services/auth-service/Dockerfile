@@ -7,7 +7,6 @@ RUN rm -rf /usr/local/tomcat/webapps/*
 WORKDIR /usr/local/tomcat
 
 # Copy WAR file to Tomcat webapps (rename to ROOT.war for root context)
-# Note: Update pom.xml to package as WAR instead of JAR
 COPY target/*.war /usr/local/tomcat/webapps/ROOT.war
 
 # Environment variables
@@ -33,4 +32,3 @@ RUN sed -i 's/port="8080"/port="8081"/' /usr/local/tomcat/conf/server.xml
 EXPOSE 8081
 
 # Tomcat starts automatically via CMD in base image
-
